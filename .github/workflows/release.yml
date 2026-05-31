@@ -43,7 +43,6 @@ jobs:
         shell: powershell
         run: |
           choco install wixtoolset --no-progress -y
-          $env:Path += ";C:\Program Files (x86)\WiX Toolset v3.11\bin"
           $version = "${{ github.ref_name }}".TrimStart("v")
           if ($version -notmatch '^\d+\.\d+\.\d+$') { $version = "0.1.0" }
           .\scripts\build-msi.ps1 -Version "$version" -OutputDir artifacts
