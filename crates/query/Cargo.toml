@@ -1,0 +1,13 @@
+[package]
+name = "sbe-query"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+sbe-common.workspace = true
+sbe-graph.workspace = true
+sbe-impact.workspace = true
+sbe-symbols.workspace = true
+serde.workspace = true

@@ -1,0 +1,9 @@
+/target/
+/.sbe/
+**/.sbe/
+dist/
+artifacts/
+*.msi
+*.wixobj
+*.wixpdb
+**/*.rs.bk
