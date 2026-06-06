@@ -1,57 +1,221 @@
 # Software Brain Engine
 
-Software Brain Engine (`sbe`) is a Rust CLI that builds a local semantic index for TypeScript and TSX repositories.
+Software Brain Engine (`sbe`) is a local code-intelligence CLI for TypeScript and TSX projects. It builds a semantic index of your repository, then returns focused impact reports for planned code changes so LLMs do not need to read the whole codebase.
 
-V1 focuses on practical syntax-based analysis: file scanning, hashing, symbol extraction, import/reference edges, impact analysis, and machine-readable context packets for future AI integrations.
+The goal is simple: install once, run `sbe`, and give developers or AI agents the smallest useful context for a change.
+
+## Why SBE
+
+Large codebases waste tokens when an LLM has to inspect broad folders before it can understand a focused change. SBE indexes the project locally and answers questions like:
+
+```powershell
+sbe benchmark C:\path\to\repo --query "jwt to passport"
+```
+
+Instead of sending the full repository, SBE reports:
+
+- matched symbols
+- affected symbols
+- impacted files
+- impacted layers such as auth, middleware, controller, service, DTO, and database
+- approximate full-context tokens vs SBE-focused tokens
+- scan/query timing
+
+Example real local validation:
+
+```text
+indexed       : 42 files, 88 symbols
+impacted      : 24 files, 49 symbols
+tokens        : full ~9469, sbe ~5319, saved ~4150 (44%)
+query time    : 3 ms
+```
 
 ## Status
 
-This repository is the first open-source V1 implementation. The TypeScript analysis is intentionally syntax-based and does not run the TypeScript type checker yet.
+SBE is a production-alpha CLI. It is usable for local TypeScript/TSX validation and benchmarking, but it is not yet a full type-aware TypeScript compiler integration.
+
+Current scope:
+
+- syntax-based TypeScript/TSX parsing through Tree-sitter
+- binary `.sbe/index.bin` storage
+- debug JSON export
+- impact analysis and layer classification
+- benchmark and validation reports
+- Windows MSI release workflow
+- Linux/macOS release archives
+
+Not yet:
+
+- full TypeScript type resolution
+- watch mode
+- exact model-tokenizer counting
+- editor extension
+- large public benchmark suite
 
 ## Install
 
-End users should install SBE from release artifacts, not from `target/`.
+Download the release artifact for your platform.
 
-- Windows: download and run `sbe-<version>-windows-x64.msi`.
-- macOS/Linux: download the platform archive from the release page, then place `sbe` on `PATH`.
-- Developers can still use `cargo install --path crates/cli --force`.
+Windows:
 
-Build folders such as `target/`, `dist/`, and `artifacts/` are generated locally and are not part of the source repo or public release.
+```text
+sbe-0.2.0-windows-x64.msi
+```
+
+Linux/macOS:
+
+```text
+sbe-linux-x64.tar.gz
+sbe-macos-arm64.tar.gz
+```
+
+After install:
+
+```powershell
+sbe version
+sbe --help
+```
+
+Developer install:
+
+```powershell
+cargo install --path crates/cli --force
+```
+
+Build folders such as `target/`, `dist/`, and `artifacts/` are generated locally. They are not part of the source repo or public release.
+
+## Quick Start
+
+Index a project:
+
+```powershell
+sbe scan C:\path\to\typescript-project
+```
+
+Check index health:
+
+```powershell
+sbe doctor C:\path\to\typescript-project
+```
+
+Analyze a planned change:
+
+```powershell
+sbe analyze-change "jwt to passport" C:\path\to\typescript-project
+```
+
+Benchmark token optimization:
+
+```powershell
+sbe benchmark C:\path\to\typescript-project --query "jwt to passport"
+```
+
+Run repeatable validation:
+
+```powershell
+sbe validate C:\path\to\typescript-project --query "jwt to passport"
+```
+
+Run the maintainer benchmark script:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\validate-benchmark.ps1 -ProjectPath C:\path\to\typescript-project -Query "jwt to passport"
+```
+
+On macOS/Linux:
+
+```bash
+scripts/validate-benchmark.sh /path/to/typescript-project "jwt to passport"
+```
+
+Export the binary index for debugging:
+
+```powershell
+sbe export-json C:\path\to\typescript-project
+```
 
 ## Commands
 
-```powershell
-cargo run -p sbe-cli -- init
-cargo run -p sbe-cli -- scan path\to\repo
-cargo run -p sbe-cli -- inspect MySymbol --json
-cargo run -p sbe-cli -- graph MySymbol
-cargo run -p sbe-cli -- impact MySymbol
-cargo run -p sbe-cli -- analyze-change "jwt to passport" path\to\repo
-cargo run -p sbe-cli -- benchmark path\to\repo --query "jwt to passport"
-cargo run -p sbe-cli -- validate path\to\repo --query "jwt to passport"
-cargo run -p sbe-cli -- doctor path\to\repo
-cargo run -p sbe-cli -- export-json path\to\repo
+| Command | Purpose |
+| --- | --- |
+| `sbe init <path>` | Create `.sbe/` metadata. |
+| `sbe scan <path>` | Build or refresh the local index. |
+| `sbe inspect <symbol> <path>` | Return context packets for a symbol. |
+| `sbe graph <symbol> <path>` | Show dependencies and dependents. |
+| `sbe impact <symbol> <path>` | Show transitive impact. |
+| `sbe analyze-change <query> <path>` | Explain affected layers/files/symbols for a planned change. |
+| `sbe benchmark <path> --query <query>` | Compare full-project tokens vs focused SBE context. |
+| `sbe validate <path> --query <query>` | Scan, benchmark, and write `.sbe/reports/validation-latest.json`. |
+| `sbe doctor <path>` | Check index health and stale files. |
+| `sbe export-json <path>` | Export `.sbe/index.bin` to readable JSON. |
+| `sbe version` | Print version and storage metadata. |
+
+`.sbe/` is local runtime index data, similar to a build cache. It is ignored by this repository and should be ignored in projects that use SBE.
+
+## How SBE Optimizes Tokens
+
+SBE does not claim magic compression. It reduces context by selecting the code slice that appears relevant to a change.
+
+Benchmark flow:
+
+1. Count approximate tokens for all indexed TypeScript/TSX source.
+2. Match the query to symbols and files.
+3. Traverse dependencies and dependents.
+4. Merge overlapping symbol ranges so nested symbols are not double-counted.
+5. Estimate focused context tokens from actual source characters.
+6. Report saved tokens and reduction percentage.
+
+See [docs/benchmark.md](docs/benchmark.md) for the benchmark methodology and how to interpret results.
+
+## Architecture
+
+SBE is a Rust workspace:
+
+- `common`: shared public data types
+- `scanner`: repository traversal and file hashing
+- `storage`: binary `.sbe/` persistence
+- `parser`: Tree-sitter TypeScript extraction
+- `symbols`: in-memory symbol indexes
+- `graph`: directed dependency graph
+- `impact`: reverse dependency analysis
+- `query`: context, benchmark, and change-analysis reports
+- `indexer`: end-to-end indexing pipeline
+- `cli`: user-facing command line
+
+See [docs/architecture.md](docs/architecture.md).
+Review hardening notes are tracked in [docs/review-issues.md](docs/review-issues.md).
+
+## Release
+
+GitHub Actions builds release artifacts.
+
+Push to a tracked branch:
+
+```text
+build and test
+build installer artifacts
 ```
 
-The binary name is `sbe` when installed:
+Push a version tag:
 
 ```powershell
-cargo install --path crates/cli
-sbe scan .
+git tag v0.2.0
+git push origin v0.2.0
 ```
 
-## Workspace
+Then GitHub publishes release downloads.
 
-- `common`: shared public data types.
-- `scanner`: repository traversal and file hashing.
-- `storage`: all `.sbe/` persistence.
-- `parser`: Tree-sitter TypeScript extraction.
-- `symbols`: in-memory symbol indexes.
-- `graph`: directed dependency graph.
-- `impact`: reverse dependency analysis.
-- `query`: context packet compiler.
-- `indexer`: end-to-end indexing pipeline.
-- `cli`: user-facing command line.
+See [docs/install.md](docs/install.md) and [docs/release.md](docs/release.md).
+
+## Website
+
+The static website lives in [website/](website/). GitHub Pages deployment is configured in `.github/workflows/pages.yml` and runs on pushes to `main` that change the website.
+
+Open locally:
+
+```text
+website/index.html
+```
 
 ## Development
 
@@ -60,45 +224,19 @@ cargo fmt --check
 cargo check --workspace
 cargo test --workspace
 cargo clippy --workspace -- -D warnings
+cargo build --release -p sbe-cli
 ```
 
-See [docs/architecture.md](docs/architecture.md) for the module contracts and V1 design boundaries.
+## Roadmap
 
-## AI Impact Analysis
+- `sbe watch` for automatic incremental indexing
+- exact tokenizer support
+- richer TypeScript import/call resolution
+- public benchmark corpus
+- editor integration
+- signed installers
+- package-manager distribution
 
-Use `analyze-change` to ask SBE for a focused change report before sending context to an LLM:
+## License
 
-```powershell
-sbe scan C:\path\to\repo
-sbe analyze-change "jwt to passport" C:\path\to\repo --json
-```
-
-The report includes matched symbols, affected symbols, impacted files, inferred layers such as auth/middleware/controller/service/DTO/database, impact percentage, and an approximate token comparison between full-repo context and SBE-focused context.
-
-## Production Alpha Commands
-
-SBE writes a binary index to `.sbe/index.bin`. Use `export-json` when you need a readable debug snapshot:
-
-```powershell
-sbe export-json C:\path\to\repo
-```
-
-Use `doctor` to check whether the index exists and whether files are stale:
-
-```powershell
-sbe doctor C:\path\to\repo
-```
-
-Use `benchmark` to compare full-project token context against focused SBE context:
-
-```powershell
-sbe benchmark C:\path\to\repo --query "jwt to passport"
-```
-
-Use `validate` for repeatable real-project testing. It scans the project, runs a benchmark, and writes `.sbe/reports/validation-latest.json`:
-
-```powershell
-sbe validate C:\path\to\repo --query "jwt to passport"
-```
-
-Install and packaging notes are in [docs/install.md](docs/install.md).
+MIT

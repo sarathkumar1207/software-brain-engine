@@ -42,6 +42,8 @@ pub enum SymbolKind {
     Enum,
     Module,
     Import,
+    Variable,
+    TypeAlias,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]

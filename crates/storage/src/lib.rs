@@ -20,7 +20,7 @@ pub struct StorageManifest {
 }
 
 impl Store {
-    pub fn open(repo_root: impl AsRef<Path>) -> anyhow::Result<Self> {
+    pub fn open_or_create(repo_root: impl AsRef<Path>) -> anyhow::Result<Self> {
         let root = repo_root.as_ref().join(".sbe");
         std::fs::create_dir_all(root.join("snapshots"))?;
         std::fs::create_dir_all(root.join("objects"))?;
@@ -28,6 +28,17 @@ impl Store {
         let store = Self { root };
         store.write_manifest()?;
         Ok(store)
+    }
+
+    pub fn open_existing(repo_root: impl AsRef<Path>) -> anyhow::Result<Self> {
+        let root = repo_root.as_ref().join(".sbe");
+        if !root.exists() {
+            anyhow::bail!(
+                "no .sbe directory found at {}. Run `sbe scan <path>` first.",
+                root.display()
+            );
+        }
+        Ok(Self { root })
     }
 
     pub fn root(&self) -> &Path {
@@ -105,11 +116,15 @@ impl Store {
         name: &str,
         report: &T,
     ) -> anyhow::Result<PathBuf> {
-        let path = self.root.join("reports").join(name);
+        let path = self.report_path(name);
         let bytes = serde_json::to_vec_pretty(report)?;
         std::fs::write(&path, bytes)
             .with_context(|| format!("failed to write {}", path.display()))?;
         Ok(path)
+    }
+
+    pub fn report_path(&self, name: &str) -> PathBuf {
+        self.root.join("reports").join(name)
     }
 
     fn write_manifest(&self) -> anyhow::Result<()> {
@@ -133,7 +148,7 @@ mod tests {
     #[test]
     fn writes_and_reads_snapshot() {
         let temp = tempfile::tempdir().unwrap();
-        let store = Store::open(temp.path()).unwrap();
+        let store = Store::open_or_create(temp.path()).unwrap();
         let mut snapshot = IndexSnapshot::empty(temp.path().to_string_lossy());
         snapshot.files.push(FileEntry {
             id: 1,
@@ -155,7 +170,7 @@ mod tests {
     #[test]
     fn exports_debug_json_from_binary_index() {
         let temp = tempfile::tempdir().unwrap();
-        let store = Store::open(temp.path()).unwrap();
+        let store = Store::open_or_create(temp.path()).unwrap();
         store
             .write_snapshot(&IndexSnapshot::empty(temp.path().to_string_lossy()))
             .unwrap();
@@ -171,7 +186,7 @@ mod tests {
     #[test]
     fn rejects_unsupported_storage_version() {
         let temp = tempfile::tempdir().unwrap();
-        let store = Store::open(temp.path()).unwrap();
+        let store = Store::open_or_create(temp.path()).unwrap();
         let mut snapshot = IndexSnapshot::empty(temp.path().to_string_lossy());
         snapshot.storage_version = STORAGE_VERSION + 1;
         let bytes = bincode::serde::encode_to_vec(&snapshot, bincode::config::standard()).unwrap();
@@ -180,5 +195,15 @@ mod tests {
         let error = store.read_snapshot().unwrap_err().to_string();
 
         assert!(error.contains("unsupported .sbe storage version"));
+    }
+
+    #[test]
+    fn open_existing_does_not_create_storage() {
+        let temp = tempfile::tempdir().unwrap();
+
+        let error = Store::open_existing(temp.path()).unwrap_err().to_string();
+
+        assert!(error.contains("no .sbe directory"));
+        assert!(!temp.path().join(".sbe").exists());
     }
 }

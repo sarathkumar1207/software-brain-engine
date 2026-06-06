@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Software Brain Engine</title>
+    <meta
+      name="description"
+      content="Software Brain Engine is a local code-intelligence CLI that builds focused impact reports for TypeScript projects before an LLM reads the codebase."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="Software Brain Engine home">
+        <span class="brand-mark">SBE</span>
+        <span>Software Brain Engine</span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#install">Install</a>
+        <a href="#benchmark">Benchmark</a>
+        <a href="#docs">Docs</a>
+        <a href="#roadmap">Roadmap</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-background" aria-hidden="true">
+          <div class="terminal-visual">
+            <div class="terminal-header">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <pre><code>sbe validate C:\repo --query "jwt to passport"
+
+indexed       : 42 files, 88 symbols
+impacted      : 24 files, 49 symbols
+query time    : 3 ms
+tokens        : full ~9469
+                sbe  ~5319
+saved         : ~4150 tokens (44%)
+
+layers:
+  Auth        3 files
+  Middleware 3 files
+  Controller 2 files
+  Service    4 files
+  DTO        7 files</code></pre>
+          </div>
+        </div>
+        <div class="hero-copy">
+          <p class="eyebrow">Local code intelligence for AI-assisted development</p>
+          <h1>Give LLMs the code that matters.</h1>
+          <p class="lead">
+            SBE indexes TypeScript repositories locally, maps symbols and impact paths, then reports the focused context needed for a planned change.
+          </p>
+          <div class="actions">
+            <a class="button primary" href="#install">Install SBE</a>
+            <a class="button secondary" href="#benchmark">See Benchmark</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="metric-band" aria-label="Benchmark summary">
+        <div>
+          <strong>44%</strong>
+          <span>token reduction in local validation</span>
+        </div>
+        <div>
+          <strong>3 ms</strong>
+          <span>query time after indexing</span>
+        </div>
+        <div>
+          <strong>.sbe</strong>
+          <span>binary local index</span>
+        </div>
+      </section>
+
+      <section class="section" id="install">
+        <div class="section-heading">
+          <p class="eyebrow">Install</p>
+          <h2>Install once, run from any terminal.</h2>
+        </div>
+        <div class="install-grid">
+          <div class="install-panel">
+            <h3>Windows</h3>
+            <p>Download the MSI from GitHub Releases and install it like a normal developer tool.</p>
+            <code>sbe-0.2.0-windows-x64.msi</code>
+          </div>
+          <div class="install-panel">
+            <h3>macOS and Linux</h3>
+            <p>Download the platform archive and place the native binary on your PATH.</p>
+            <code>sbe-linux-x64.tar.gz</code>
+          </div>
+          <div class="install-panel">
+            <h3>Developers</h3>
+            <p>Install from source while developing the project.</p>
+            <code>cargo install --path crates/cli --force</code>
+          </div>
+        </div>
+      </section>
+
+      <section class="section split" id="benchmark">
+        <div>
+          <p class="eyebrow">Proof</p>
+          <h2>Benchmark the token savings before pitching the result.</h2>
+          <p>
+            SBE compares full-project context against focused impacted symbols, files, and layers. The benchmark is intentionally explicit so wins and misses are visible.
+          </p>
+        </div>
+        <div class="benchmark-card">
+          <div class="bar-row">
+            <span>Full project</span>
+            <div class="bar"><i style="width: 100%"></i></div>
+            <strong>9469</strong>
+          </div>
+          <div class="bar-row">
+            <span>SBE context</span>
+            <div class="bar"><i class="green" style="width: 56%"></i></div>
+            <strong>5319</strong>
+          </div>
+          <div class="saving">Saved approximately 4150 tokens for the sample change.</div>
+        </div>
+      </section>
+
+      <section class="section" id="docs">
+        <div class="section-heading">
+          <p class="eyebrow">CLI</p>
+          <h2>Commands for humans and agents.</h2>
+        </div>
+        <div class="command-list">
+          <code>sbe scan C:\repo</code>
+          <code>sbe doctor C:\repo</code>
+          <code>sbe analyze-change "jwt to passport" C:\repo</code>
+          <code>sbe benchmark C:\repo --query "jwt to passport"</code>
+          <code>sbe validate C:\repo --query "jwt to passport"</code>
+          <code>sbe export-json C:\repo</code>
+        </div>
+      </section>
+
+      <section class="section split" id="roadmap">
+        <div>
+          <p class="eyebrow">Roadmap</p>
+          <h2>From production alpha to Git-like code intelligence.</h2>
+        </div>
+        <ol class="roadmap">
+          <li><span>1</span> Watch mode and incremental indexing</li>
+          <li><span>2</span> Exact tokenizer support</li>
+          <li><span>3</span> Richer TypeScript resolver</li>
+          <li><span>4</span> Public benchmark corpus</li>
+          <li><span>5</span> Editor and agent integrations</li>
+        </ol>
+      </section>
+    </main>
+
+    <footer>
+      <span>Software Brain Engine</span>
+      <span>MIT licensed local-first code intelligence.</span>
+    </footer>
+    <script src="site.js"></script>
+  </body>
+</html>

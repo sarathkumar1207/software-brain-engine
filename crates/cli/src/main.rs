@@ -262,8 +262,8 @@ fn main() -> anyhow::Result<()> {
                 benchmark,
                 report_path: String::new(),
             };
-            let store = Store::open(&path)?;
-            let report_path = store.write_report_json("validation-latest.json", &report)?;
+            let store = Store::open_or_create(&path)?;
+            let report_path = store.report_path("validation-latest.json");
             report.report_path = report_path.display().to_string();
             store.write_report_json("validation-latest.json", &report)?;
 
@@ -307,7 +307,7 @@ fn main() -> anyhow::Result<()> {
             }
         }
         Commands::ExportJson { path, json } => {
-            let store = Store::open(path)?;
+            let store = Store::open_existing(path)?;
             let export_path = store.export_snapshot_json()?;
             if json {
                 println!(
@@ -377,7 +377,7 @@ fn yes_no(value: bool) -> &'static str {
 }
 
 fn query_engine(path: PathBuf) -> anyhow::Result<QueryEngine> {
-    let store = Store::open(path)?;
+    let store = Store::open_existing(path)?;
     if !store.has_index() {
         anyhow::bail!(
             "no SBE index found at {}. Run `sbe scan <path>` or `sbe validate <path>` first.",

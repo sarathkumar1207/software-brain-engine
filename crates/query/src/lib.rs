@@ -4,6 +4,7 @@ use sbe_impact::{ImpactAnalyzer, ImpactReport};
 use sbe_symbols::SymbolRegistry;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::path::PathBuf;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct GraphReport {
@@ -76,12 +77,14 @@ pub struct BenchmarkReport {
 pub struct QueryEngine {
     registry: SymbolRegistry,
     graph: SemanticGraph,
+    root: PathBuf,
     files: HashMap<u64, FileEntry>,
     symbols: Vec<Symbol>,
 }
 
 impl QueryEngine {
     pub fn from_snapshot(snapshot: IndexSnapshot) -> Self {
+        let root = PathBuf::from(&snapshot.root);
         let files = snapshot
             .files
             .into_iter()
@@ -94,6 +97,7 @@ impl QueryEngine {
         Self {
             registry,
             graph,
+            root,
             files,
             symbols,
         }
@@ -198,7 +202,7 @@ impl QueryEngine {
         let file_path = self
             .files
             .get(&symbol.file_id)
-            .map(|file| file.path.clone())
+            .map(|file| self.file_path(file).display().to_string())
             .unwrap_or_default();
         let line_count = symbol
             .range
@@ -272,7 +276,7 @@ impl QueryEngine {
         let without_sbe_tokens: u32 = self
             .files
             .values()
-            .map(|file| estimate_file_tokens(&file.path))
+            .map(|file| estimate_file_tokens(self.file_path(file)))
             .sum();
 
         let focused_ranges = merged_ranges_by_file(focused_symbols);
@@ -281,7 +285,7 @@ impl QueryEngine {
             .map(|(file_id, ranges)| {
                 self.files
                     .get(file_id)
-                    .map(|file| estimate_ranges_tokens(&file.path, ranges))
+                    .map(|file| estimate_ranges_tokens(self.file_path(file), ranges))
                     .unwrap_or_default()
             })
             .sum();
@@ -297,6 +301,10 @@ impl QueryEngine {
             saved_tokens,
             reduction_percentage,
         }
+    }
+
+    fn file_path(&self, file: &FileEntry) -> PathBuf {
+        self.root.join(&file.relative_path)
     }
 }
 
@@ -345,13 +353,11 @@ fn tokenize_query(query: &str) -> Vec<String> {
 }
 
 fn classify_layer(path: &str) -> CodeLayer {
-    let path = path.to_lowercase();
+    let path = path.to_lowercase().replace('\\', "/");
     if path.contains("middleware") || path.contains("guard") {
         CodeLayer::Middleware
     } else if path.contains("controller") || path.contains("handler") {
         CodeLayer::Controller
-    } else if path.contains("service") {
-        CodeLayer::Service
     } else if path.contains("dto") || path.contains("schema") || path.contains("request") {
         CodeLayer::Dto
     } else if path.contains("repository")
@@ -371,8 +377,10 @@ fn classify_layer(path: &str) -> CodeLayer {
         CodeLayer::Test
     } else if path.ends_with(".tsx") || path.contains("component") || path.contains("page") {
         CodeLayer::Ui
-    } else if path.contains("auth") || path.contains("jwt") || path.contains("passport") {
+    } else if path.contains("/auth/") || path.contains("jwt") || path.contains("passport") {
         CodeLayer::Auth
+    } else if path.contains("service") {
+        CodeLayer::Service
     } else {
         CodeLayer::Unknown
     }
@@ -398,13 +406,13 @@ fn layer_impacts(files: &[ImpactedFile]) -> Vec<LayerImpact> {
     impacts
 }
 
-fn estimate_file_tokens(path: &str) -> u32 {
+fn estimate_file_tokens(path: impl AsRef<std::path::Path>) -> u32 {
     std::fs::read_to_string(path)
         .map(|source| (source.chars().count() as u32).saturating_add(3) / 4)
         .unwrap_or_default()
 }
 
-fn estimate_ranges_tokens(path: &str, ranges: &[(u32, u32)]) -> u32 {
+fn estimate_ranges_tokens(path: impl AsRef<std::path::Path>, ranges: &[(u32, u32)]) -> u32 {
     let Ok(source) = std::fs::read_to_string(path) else {
         return 0;
     };
@@ -472,6 +480,7 @@ mod tests {
     #[test]
     fn classifies_auth_change_layers() {
         assert_eq!(classify_layer("src/auth/jwt.strategy.ts"), CodeLayer::Auth);
+        assert_eq!(classify_layer("src/auth/auth.service.ts"), CodeLayer::Auth);
         assert_eq!(
             classify_layer("src/middleware/auth.middleware.ts"),
             CodeLayer::Middleware
@@ -506,7 +515,36 @@ mod tests {
         assert!(report
             .impacted_layers
             .iter()
-            .any(|impact| impact.layer == CodeLayer::Service));
+            .any(|impact| impact.layer == CodeLayer::Auth));
         assert!(report.llm_summary.contains("token reduction"));
+    }
+
+    #[test]
+    fn token_estimate_uses_snapshot_root_not_absolute_file_path() {
+        let temp = tempfile::tempdir().unwrap();
+        std::fs::create_dir_all(temp.path().join("src")).unwrap();
+        std::fs::write(
+            temp.path().join("src/auth.ts"),
+            "export function JwtAuthService() { return true; }\n",
+        )
+        .unwrap();
+        let snapshot = IndexSnapshot {
+            storage_version: 1,
+            root: temp.path().to_string_lossy().to_string(),
+            files: vec![FileEntry {
+                id: 1,
+                path: "moved/old/path/src/auth.ts".into(),
+                relative_path: "src/auth.ts".into(),
+                hash: "hash".into(),
+                extension: "ts".into(),
+            }],
+            symbols: vec![symbol(10, "JwtAuthService", 1)],
+            imports: vec![],
+            edges: vec![],
+        };
+
+        let report = QueryEngine::from_snapshot(snapshot).benchmark("jwt");
+
+        assert!(report.token_estimate.without_sbe_tokens > 0);
     }
 }

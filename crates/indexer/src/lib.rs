@@ -1,3 +1,4 @@
+use rayon::prelude::*;
 use sbe_common::{Edge, FileEntry, IndexSnapshot, ParsedFile, RelationType};
 use sbe_parser::TypeScriptParser;
 use sbe_scanner::Scanner;
@@ -35,45 +36,50 @@ pub struct Indexer {
     root: PathBuf,
     store: Store,
     scanner: Scanner,
-    parser: TypeScriptParser,
 }
 
 impl Indexer {
     pub fn new(root: impl Into<PathBuf>) -> anyhow::Result<Self> {
         let root = root.into();
         Ok(Self {
-            store: Store::open(&root)?,
+            store: Store::open_or_create(&root)?,
             scanner: Scanner::new(&root),
-            parser: TypeScriptParser::new()?,
             root,
         })
     }
 
     pub fn init(root: impl AsRef<Path>) -> anyhow::Result<Store> {
-        Store::open(root)
+        Store::open_or_create(root)
     }
 
     pub fn run(&mut self) -> anyhow::Result<IndexReport> {
         let started = std::time::Instant::now();
         let scan = self.scanner.scan_with_report()?;
-        let mut parsed_files = Vec::new();
         let mut warnings = scan.warnings.clone();
 
-        for file in &scan.files {
-            let source = match std::fs::read_to_string(&file.path) {
-                Ok(source) => source,
-                Err(error) => {
-                    warnings.push(format!("failed to read {}: {error}", file.path));
-                    continue;
-                }
-            };
-            match self.parser.parse_file(file, &source) {
+        let parsed_results: Vec<anyhow::Result<ParsedFile>> = scan
+            .files
+            .par_iter()
+            .map(|file| {
+                let source = std::fs::read_to_string(&file.path)
+                    .map_err(|error| anyhow::anyhow!("failed to read {}: {error}", file.path))?;
+                let mut parser = TypeScriptParser::new();
+                parser
+                    .parse_file(file, &source)
+                    .map_err(|error| anyhow::anyhow!("failed to parse {}: {error}", file.path))
+            })
+            .collect();
+
+        let mut parsed_files = Vec::new();
+        for result in parsed_results {
+            match result {
                 Ok(parsed) => parsed_files.push(parsed),
-                Err(error) => warnings.push(format!("failed to parse {}: {error}", file.path)),
+                Err(error) => warnings.push(error.to_string()),
             }
         }
 
-        let snapshot = build_snapshot(&self.root, scan.files, parsed_files);
+        let (snapshot, import_warnings) = build_snapshot(&self.root, scan.files, parsed_files);
+        warnings.extend(import_warnings);
         let report = IndexReport {
             files_scanned: snapshot.files.len(),
             symbols_found: snapshot.symbols.len(),
@@ -95,12 +101,12 @@ impl Indexer {
 
     pub fn doctor(root: impl Into<PathBuf>) -> anyhow::Result<DoctorReport> {
         let root = root.into();
-        let store = Store::open(&root)?;
         let scanner = Scanner::new(&root);
         let scan = scanner.scan_with_report()?;
         let mut warnings = scan.warnings;
 
-        let snapshot = if store.has_index() {
+        let store = Store::open_existing(&root).ok();
+        let snapshot = if let Some(store) = &store {
             match store.read_snapshot() {
                 Ok(snapshot) => Some(snapshot),
                 Err(error) => {
@@ -119,8 +125,8 @@ impl Indexer {
 
         Ok(DoctorReport {
             path: root.display().to_string(),
-            initialized: store.root().exists(),
-            has_index: store.has_index(),
+            initialized: store.is_some(),
+            has_index: store.as_ref().map(Store::has_index).unwrap_or(false),
             storage_version: snapshot.as_ref().map(|snapshot| snapshot.storage_version),
             indexed_files: snapshot
                 .as_ref()
@@ -153,7 +159,7 @@ fn build_snapshot(
     root: &Path,
     files: Vec<FileEntry>,
     parsed_files: Vec<ParsedFile>,
-) -> IndexSnapshot {
+) -> (IndexSnapshot, Vec<String>) {
     let mut snapshot = IndexSnapshot::empty(root.to_string_lossy().to_string());
     snapshot.files = files;
 
@@ -163,12 +169,13 @@ fn build_snapshot(
         snapshot.edges.extend(parsed.edges);
     }
 
-    snapshot.edges.extend(resolve_import_edges(&snapshot));
+    let (import_edges, warnings) = resolve_import_edges(&snapshot);
+    snapshot.edges.extend(import_edges);
     dedupe_edges(&mut snapshot.edges);
-    snapshot
+    (snapshot, warnings)
 }
 
-fn resolve_import_edges(snapshot: &IndexSnapshot) -> Vec<Edge> {
+fn resolve_import_edges(snapshot: &IndexSnapshot) -> (Vec<Edge>, Vec<String>) {
     let file_by_id: HashMap<u64, &FileEntry> =
         snapshot.files.iter().map(|file| (file.id, file)).collect();
     let mut symbols_by_name: HashMap<&str, Vec<u64>> = HashMap::new();
@@ -180,6 +187,7 @@ fn resolve_import_edges(snapshot: &IndexSnapshot) -> Vec<Edge> {
     }
 
     let mut edges = Vec::new();
+    let mut warnings = Vec::new();
     for import in &snapshot.imports {
         let imported_file = file_by_id
             .get(&import.file_id)
@@ -201,7 +209,17 @@ fn resolve_import_edges(snapshot: &IndexSnapshot) -> Vec<Edge> {
                 if module_matches {
                     let source = file_by_id
                         .get(&import.file_id)
-                        .and_then(|file| std::fs::read_to_string(&file.path).ok())
+                        .map(|file| snapshot_file_path(snapshot, file))
+                        .and_then(|path| match std::fs::read_to_string(&path) {
+                            Ok(source) => Some(source),
+                            Err(error) => {
+                                warnings.push(format!(
+                                    "failed to read import source {}: {error}",
+                                    path.display()
+                                ));
+                                None
+                            }
+                        })
                         .unwrap_or_default();
 
                     for local_symbol in snapshot
@@ -235,7 +253,11 @@ fn resolve_import_edges(snapshot: &IndexSnapshot) -> Vec<Edge> {
         }
     }
 
-    edges
+    (edges, warnings)
+}
+
+fn snapshot_file_path(snapshot: &IndexSnapshot, file: &FileEntry) -> PathBuf {
+    PathBuf::from(&snapshot.root).join(&file.relative_path)
 }
 
 fn contains_identifier(source: &str, needle: &str) -> bool {
@@ -311,6 +333,7 @@ fn dedupe_edges(edges: &mut Vec<Edge>) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use sbe_common::{ImportRecord, SourceRange, Symbol, SymbolKind, Visibility};
 
     #[test]
     fn indexes_sample_project_end_to_end() {
@@ -351,5 +374,98 @@ mod tests {
 
         assert!(report.has_index);
         assert_eq!(report.stale_files, vec!["a.ts"]);
+    }
+
+    #[test]
+    fn doctor_does_not_create_storage_for_unindexed_repo() {
+        let temp = tempfile::tempdir().unwrap();
+        std::fs::write(temp.path().join("a.ts"), "export function a() {}").unwrap();
+
+        let report = Indexer::doctor(temp.path()).unwrap();
+
+        assert!(!report.initialized);
+        assert!(!report.has_index);
+        assert!(!temp.path().join(".sbe").exists());
+    }
+
+    #[test]
+    fn import_edges_read_from_snapshot_root_relative_path() {
+        let temp = tempfile::tempdir().unwrap();
+        std::fs::create_dir_all(temp.path().join("src")).unwrap();
+        std::fs::write(
+            temp.path().join("src/app.ts"),
+            "import { helper } from './helper'; export function app() { return helper(); }",
+        )
+        .unwrap();
+        std::fs::write(
+            temp.path().join("src/helper.ts"),
+            "export function helper() { return 1; }",
+        )
+        .unwrap();
+
+        let range = SourceRange {
+            start_line: 1,
+            end_line: 1,
+            start_col: 0,
+            end_col: 1,
+        };
+        let snapshot = IndexSnapshot {
+            storage_version: sbe_common::STORAGE_VERSION,
+            root: temp.path().to_string_lossy().to_string(),
+            files: vec![
+                FileEntry {
+                    id: 1,
+                    path: "old/moved/src/app.ts".into(),
+                    relative_path: "src/app.ts".into(),
+                    hash: "hash".into(),
+                    extension: "ts".into(),
+                },
+                FileEntry {
+                    id: 2,
+                    path: "old/moved/src/helper.ts".into(),
+                    relative_path: "src/helper.ts".into(),
+                    hash: "hash".into(),
+                    extension: "ts".into(),
+                },
+            ],
+            symbols: vec![
+                Symbol {
+                    id: 10,
+                    content_hash: "app".into(),
+                    name: "app".into(),
+                    kind: SymbolKind::Function,
+                    file_id: 1,
+                    range: range.clone(),
+                    parent_symbol: None,
+                    visibility: Visibility::Public,
+                    signature: None,
+                    exported: true,
+                },
+                Symbol {
+                    id: 20,
+                    content_hash: "helper".into(),
+                    name: "helper".into(),
+                    kind: SymbolKind::Function,
+                    file_id: 2,
+                    range: range.clone(),
+                    parent_symbol: None,
+                    visibility: Visibility::Public,
+                    signature: None,
+                    exported: true,
+                },
+            ],
+            imports: vec![ImportRecord {
+                file_id: 1,
+                module: "./helper".into(),
+                names: vec!["helper".into()],
+                range,
+            }],
+            edges: vec![],
+        };
+
+        let (edges, warnings) = resolve_import_edges(&snapshot);
+
+        assert!(warnings.is_empty());
+        assert!(edges.iter().any(|edge| edge.from == 10 && edge.to == 20));
     }
 }

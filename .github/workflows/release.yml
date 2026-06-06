@@ -44,7 +44,7 @@ jobs:
         run: |
           choco install wixtoolset --no-progress -y
           $version = "${{ github.ref_name }}".TrimStart("v")
-          if ($version -notmatch '^\d+\.\d+\.\d+$') { $version = "0.1.0" }
+          if ($version -notmatch '^\d+\.\d+\.\d+$') { $version = "0.2.0" }
           .\scripts\build-msi.ps1 -Version "$version" -OutputDir artifacts
 
       - name: Package Unix binary
