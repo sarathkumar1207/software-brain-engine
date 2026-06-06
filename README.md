@@ -1,4 +1,12 @@
-# Software Brain Engine
+<p align="center">
+  <img src="assets/sbe-logo.svg" alt="Software Brain Engine logo" width="128" height="128">
+</p>
+
+<h1 align="center">Software Brain Engine</h1>
+
+<p align="center">
+  Local semantic graph infrastructure for precise AI code context retrieval.
+</p>
 
 [![Rust](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/rust.yml/badge.svg)](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/rust.yml)
 [![Release](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/release.yml/badge.svg)](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/release.yml)
@@ -13,6 +21,8 @@
 Software Brain Engine (`sbe`) is a local code-intelligence CLI for TypeScript and TSX projects. It builds a semantic index of your repository, then returns focused impact reports for planned code changes so LLMs do not need to read the whole codebase.
 
 The goal is simple: install once, run `sbe`, and give developers or AI agents the smallest useful context for a change.
+
+The logo represents SBE's core model: a central semantic graph node connected to the exact code symbols and dependency paths that matter for a change.
 
 ## Pitch
 
