@@ -6,7 +6,7 @@
     <title>Software Brain Engine</title>
     <meta
       name="description"
-      content="Software Brain Engine is a local Rust CLI that indexes TypeScript repositories and returns focused impact reports for AI-assisted software changes."
+      content="Software Brain Engine turns TypeScript repositories into semantic graphs so AI systems can retrieve relevant code instead of loading entire repositories."
     />
     <link rel="stylesheet" href="styles.css" />
   </head>
@@ -14,274 +14,218 @@
     <header class="topbar">
       <a class="brand" href="#top" aria-label="Software Brain Engine home">
         <span class="brand-mark">SBE</span>
-        <span class="brand-name">Software Brain Engine</span>
+        <span>Software Brain Engine</span>
       </a>
       <nav aria-label="Primary navigation">
-        <a href="#why">Why</a>
-        <a href="#benchmark">Benchmark</a>
-        <a href="#install">Install</a>
+        <a href="#before-after">Before / After</a>
+        <a href="#demo">Demo</a>
         <a href="#architecture">Architecture</a>
-        <a href="#validate">Validate</a>
+        <a href="#roadmap">Roadmap</a>
       </nav>
     </header>
 
     <main id="top">
       <section class="hero">
-        <div class="hero-media" aria-label="SBE terminal benchmark output">
-          <div class="terminal-window">
-            <div class="terminal-title">
-              <span>sbe validate</span>
-              <small>local TypeScript repo</small>
-            </div>
-            <pre><code>$ sbe validate C:\repo --query "jwt to passport"
-
-SBE validation complete
-  project       : C:\repo
-  scan warnings : 0
-
-SBE benchmark
-  indexed       : 42 files, 88 symbols
-  impacted      : 24 files, 49 symbols
-  tokens        : full ~9469, sbe ~5319
-  saved         : ~4150 tokens (44%)
-  layers        : Auth, Middleware, Controller, DTO</code></pre>
-          </div>
-          <div class="flow-strip" aria-hidden="true">
-            <span>Scan</span>
-            <i></i>
-            <span>Index</span>
-            <i></i>
-            <span>Impact</span>
-            <i></i>
-            <span>LLM Context</span>
-          </div>
-        </div>
         <div class="hero-copy">
-          <p class="eyebrow">Open-source Rust CLI for AI-assisted development</p>
-          <h1>Software Brain Engine</h1>
-          <p class="lead">
-            SBE indexes TypeScript and TSX repositories locally, maps symbols and dependency impact, then returns the focused context an LLM needs for a planned change.
+          <p class="eyebrow">Open-source semantic graph engine for code context</p>
+          <h1>Stop sending entire codebases to AI.</h1>
+          <p class="hero-problem">
+            LLM coding tools waste tokens when they load broad folders before understanding the change.
           </p>
+          <p class="hero-solution">
+            SBE turns repositories into semantic graphs for precise AI context retrieval.
+          </p>
+          <div class="hero-command" aria-label="Command line example">
+            <span>$</span>
+            <code>sbe impact createUser --json</code>
+          </div>
           <div class="hero-actions">
-            <a class="button primary" href="#install">Install</a>
-            <a class="button secondary" href="#benchmark">View Benchmark</a>
-            <a class="button ghost" href="#commands">CLI Commands</a>
+            <a class="button primary" href="https://github.com/sarathkumar1207/software-brain-engine">View on GitHub</a>
+            <a class="button secondary" href="#demo">See CLI Demo</a>
           </div>
-          <dl class="hero-facts">
-            <div>
-              <dt>Storage</dt>
-              <dd>.sbe/index.bin</dd>
-            </div>
-            <div>
-              <dt>Language</dt>
-              <dd>TypeScript/TSX first</dd>
-            </div>
-            <div>
-              <dt>Release</dt>
-              <dd>MSI plus native archives</dd>
-            </div>
-          </dl>
+        </div>
+        <div class="hero-terminal" aria-label="SBE graph output preview">
+          <div class="terminal-header">
+            <span>sbe graph createUser</span>
+            <small>semantic graph query</small>
+          </div>
+          <pre><code>symbol: createUser
+kind: Function
+file: src/users/user.service.ts:18-42
+
+dependencies:
+  -> validateCreateUserDto
+  -> UserRepository.save
+  -> hashPassword
+
+dependents:
+  <- POST /users controller
+  <- createUserHandler
+
+context:
+  4 files, 7 symbols, exact source ranges</code></pre>
         </div>
       </section>
 
-      <section class="metric-band" aria-label="Current alpha benchmark metrics">
-        <div>
-          <strong>44%</strong>
-          <span>token reduction in one local validation</span>
-        </div>
-        <div>
-          <strong>3 ms</strong>
-          <span>query time after indexing</span>
-        </div>
-        <div>
-          <strong>0%</strong>
-          <span>reported honestly on tiny fixtures when overhead is larger</span>
-        </div>
-        <div>
-          <strong>15</strong>
-          <span>review issues fixed with regression coverage</span>
-        </div>
-      </section>
-
-      <section class="section intro" id="why">
-        <div class="section-kicker">Why It Exists</div>
-        <div class="wide-copy">
-          <h2>LLMs should not read the whole repo for every focused change.</h2>
-          <p>
-            A change like replacing JWT authentication with Passport often touches predictable layers: auth strategy, middleware, controllers, DTOs, database entities, and tests. SBE builds a local index first, then asks the code graph what is likely affected before an AI agent spends tokens reading files.
-          </p>
-        </div>
-        <div class="problem-grid">
-          <article>
-            <h3>Without SBE</h3>
-            <p>The agent searches broad folders, opens unrelated files, and spends context before it understands the subsystem.</p>
-          </article>
-          <article>
-            <h3>With SBE</h3>
-            <p>The agent receives matched symbols, impacted files, dependency direction, layer classification, and token estimates.</p>
-          </article>
-          <article>
-            <h3>Production Alpha Scope</h3>
-            <p>Reliable local CLI behavior, binary storage, clear terminal output, repeatable validation, and transparent benchmark evidence.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section two-column" id="benchmark">
-        <div>
-          <div class="section-kicker">Benchmark Proof</div>
-          <h2>Measure token optimization before claiming it.</h2>
-          <p>
-            SBE compares full-project TypeScript source tokens against focused impacted symbol ranges plus metadata. It reports both wins and misses, because small projects can cost more metadata than they save.
-          </p>
-          <div class="callout">
-            <strong>Current estimator:</strong>
-            <span>Approximate tokens are calculated from source characters. Exact tokenizer support is planned after the validation harness is stable.</span>
-          </div>
-        </div>
-        <div class="benchmark-panel">
-          <div class="bar-row">
-            <span>Full project context</span>
-            <div class="bar"><i class="full" style="width: 100%"></i></div>
-            <strong>9469</strong>
-          </div>
-          <div class="bar-row">
-            <span>SBE focused context</span>
-            <div class="bar"><i class="focused" style="width: 56%"></i></div>
-            <strong>5319</strong>
-          </div>
-          <div class="saving">Saved approximately 4150 tokens for the sample local auth migration query.</div>
-          <pre class="compact-code"><code>sbe benchmark C:\repo --query "jwt to passport" --json</code></pre>
-        </div>
-      </section>
-
-      <section class="section" id="install">
+      <section class="section before-after" id="before-after">
         <div class="section-heading">
-          <div class="section-kicker">Install</div>
-          <h2>Install like a normal developer tool.</h2>
-          <p>SBE should feel closer to Git than a project folder. End users download one release artifact, install it, and run `sbe` from any terminal.</p>
+          <p class="label">Before / After</p>
+          <h2>Give the model a code graph, not a scavenger hunt.</h2>
         </div>
-        <div class="install-grid">
+        <div class="comparison">
           <article>
-            <h3>Windows</h3>
-            <p>Download the MSI from GitHub Releases. It installs `sbe.exe` and updates PATH.</p>
-            <code>sbe-0.2.0-windows-x64.msi</code>
+            <h3>Before SBE</h3>
+            <ul>
+              <li>LLM reads 10-20 files to find the relevant path.</li>
+              <li>Guesses dependencies from imports and naming.</li>
+              <li>Burns tokens on unrelated controllers, services, and DTOs.</li>
+              <li>Misses downstream impact during refactors.</li>
+            </ul>
           </article>
-          <article>
-            <h3>macOS</h3>
-            <p>Download the native archive and place the binary on PATH.</p>
-            <code>sbe-macos-arm64.tar.gz</code>
-          </article>
-          <article>
-            <h3>Linux</h3>
-            <p>Download the native archive or build from source while contributing.</p>
-            <code>sbe-linux-x64.tar.gz</code>
+          <article class="after">
+            <h3>After SBE</h3>
+            <ul>
+              <li>LLM queries the semantic graph first.</li>
+              <li>Gets exact functions, classes, dependencies, and dependents.</li>
+              <li>Receives file paths and source code ranges.</li>
+              <li>Uses focused context instead of broad repository dumps.</li>
+            </ul>
           </article>
         </div>
       </section>
 
-      <section class="section" id="commands">
+      <section class="section compact" id="what-it-does">
         <div class="section-heading">
-          <div class="section-kicker">CLI</div>
-          <h2>Human-readable by default. JSON when tools need it.</h2>
+          <p class="label">What It Does</p>
+          <h2>A local index for code structure and change impact.</h2>
         </div>
-        <div class="command-table" role="table" aria-label="SBE command reference">
-          <div role="row">
-            <code>sbe scan C:\repo</code>
-            <span>Build or refresh the local `.sbe/` index.</span>
-          </div>
-          <div role="row">
-            <code>sbe doctor C:\repo</code>
-            <span>Check storage version, stale files, warnings, and index health.</span>
-          </div>
-          <div role="row">
-            <code>sbe analyze-change "jwt to passport" C:\repo</code>
-            <span>Return affected symbols, files, layers, and token estimates.</span>
-          </div>
-          <div role="row">
-            <code>sbe benchmark C:\repo --query "jwt to passport"</code>
-            <span>Compare full-repo context with focused SBE context.</span>
-          </div>
-          <div role="row">
-            <code>sbe validate C:\repo --query "jwt to passport"</code>
-            <span>Run scan plus benchmark and write `.sbe/reports/validation-latest.json`.</span>
-          </div>
-          <div role="row">
-            <code>sbe export-json C:\repo</code>
-            <span>Export the binary index to readable debug JSON.</span>
-          </div>
+        <div class="feature-list">
+          <div><strong>Builds a semantic graph</strong><span>Files, symbols, imports, references, and containment edges.</span></div>
+          <div><strong>Extracts code structure</strong><span>Functions, classes, methods, interfaces, enums, variables, and type aliases.</span></div>
+          <div><strong>Maps exact ranges</strong><span>Symbols point back to concrete source lines for retrieval.</span></div>
+          <div><strong>Computes impact</strong><span>Reverse graph traversal shows what changes when a symbol changes.</span></div>
+          <div><strong>Compresses AI context</strong><span>Send focused graph context instead of the whole repository.</span></div>
+        </div>
+      </section>
+
+      <section class="section demo" id="demo">
+        <div class="section-heading">
+          <p class="label">Demo</p>
+          <h2>Ask the repository what matters.</h2>
+        </div>
+        <div class="demo-grid">
+          <article>
+            <h3>Scan</h3>
+            <pre><code>$ sbe scan ./repo
+
+SBE scan complete
+  indexed files : 214
+  graph         : 918 symbols, 301 imports, 1440 edges
+  storage       : ./repo/.sbe
+  elapsed       : 682 ms</code></pre>
+          </article>
+          <article>
+            <h3>Graph</h3>
+            <pre><code>$ sbe graph createUser --json
+
+{
+  "symbol": "createUser",
+  "dependencies": ["CreateUserDto", "hashPassword", "UserRepository.save"],
+  "dependents": ["UsersController.create", "createUserHandler"]
+}</code></pre>
+          </article>
+          <article>
+            <h3>Impact</h3>
+            <pre><code>$ sbe impact saveUser
+
+origin: saveUser
+affected:
+  UsersService.createUser
+  UsersController.create
+  AuthService.register
+  tests/users/create-user.spec.ts</code></pre>
+          </article>
+        </div>
+      </section>
+
+      <section class="section why">
+        <div class="section-heading">
+          <p class="label">Why It Matters</p>
+          <h2>Context is the bottleneck in AI-assisted development.</h2>
+        </div>
+        <div class="why-copy">
+          <p>
+            AI tools are strongest when they receive the right code. They become expensive and unreliable when they read entire repositories, infer architecture from partial searches, or miss hidden dependents.
+          </p>
+          <p>
+            SBE reduces unnecessary context by retrieving code through a semantic graph. The result is smaller prompts, clearer dependency awareness, and better refactoring decisions.
+          </p>
         </div>
       </section>
 
       <section class="section architecture" id="architecture">
         <div class="section-heading">
-          <div class="section-kicker">Architecture</div>
-          <h2>Modular Rust workspace built for growth.</h2>
-          <p>Each crate owns one responsibility so the project can scale without becoming one large CLI file.</p>
+          <p class="label">Architecture</p>
+          <h2>Simple pipeline. Local storage. Tool-friendly output.</h2>
         </div>
-        <div class="architecture-grid">
-          <article><strong>scanner</strong><span>walks repos, ignores generated folders, hashes source files</span></article>
-          <article><strong>parser</strong><span>extracts TypeScript symbols, imports, nesting, references</span></article>
-          <article><strong>storage</strong><span>owns `.sbe/` binary snapshots, manifests, debug export</span></article>
-          <article><strong>graph</strong><span>builds directed relationships for imports and references</span></article>
-          <article><strong>impact</strong><span>traverses reverse dependencies for affected symbols</span></article>
-          <article><strong>query</strong><span>produces inspect, benchmark, and change-analysis reports</span></article>
-          <article><strong>indexer</strong><span>runs scan, parse, storage, and warnings end to end</span></article>
-          <article><strong>cli</strong><span>turns engine reports into terminal and JSON output</span></article>
+        <div class="diagram" aria-label="SBE architecture diagram">
+          <span>Codebase</span>
+          <i></i>
+          <span>Scanner</span>
+          <i></i>
+          <span>Semantic Graph</span>
+          <i></i>
+          <span>Context Compiler</span>
+          <i></i>
+          <span>AI</span>
         </div>
+        <p class="architecture-note">
+          V1 uses practical syntax-based TypeScript analysis through Tree-sitter. It is not a TypeScript type checker or language server. The goal is fast local graph retrieval for AI context.
+        </p>
       </section>
 
-      <section class="section two-column" id="validate">
-        <div>
-          <div class="section-kicker">Validation</div>
-          <h2>Prove it on real projects, then improve the misses.</h2>
-          <p>
-            The validation script builds the release binary, scans a project, runs a benchmark query, and stores a report under `.sbe/reports/`. That gives contributors a repeatable way to compare correctness and token behavior.
-          </p>
-        </div>
-        <div class="script-panel">
-          <h3>Windows</h3>
-          <code>powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\validate-benchmark.ps1 -ProjectPath C:\repo -Query "jwt to passport"</code>
-          <h3>macOS and Linux</h3>
-          <code>scripts/validate-benchmark.sh /path/to/repo "jwt to passport"</code>
-        </div>
-      </section>
-
-      <section class="section release">
-        <div>
-          <div class="section-kicker">Open Source Release Model</div>
-          <h2>Source code stays clean. Releases ship only usable artifacts.</h2>
-          <p>
-            `target/`, `dist/`, `.sbe/`, WiX intermediates, and generated reports are local output. GitHub Releases should expose the MSI and platform archives, not build folders.
-          </p>
-        </div>
-        <ol class="release-list">
-          <li><span>1</span> Push source to `main`</li>
-          <li><span>2</span> CI runs fmt, tests, clippy, release build</li>
-          <li><span>3</span> Version tags publish downloadable artifacts</li>
-          <li><span>4</span> Website publishes from `website/` to `gh-pages`</li>
-        </ol>
-      </section>
-
-      <section class="section roadmap-section">
+      <section class="section use-cases">
         <div class="section-heading">
-          <div class="section-kicker">Roadmap</div>
-          <h2>Next steps toward Git-like code intelligence.</h2>
+          <p class="label">Use Cases</p>
+          <h2>Built for real code-navigation work.</h2>
         </div>
-        <div class="roadmap">
-          <article><span>01</span><strong>Watch mode</strong><p>Automatic incremental indexing while coding.</p></article>
-          <article><span>02</span><strong>Exact tokenizer</strong><p>Model-specific token counts for benchmark proof.</p></article>
-          <article><span>03</span><strong>Resolver accuracy</strong><p>Better TypeScript import, call, and layer inference.</p></article>
-          <article><span>04</span><strong>Public corpus</strong><p>Open benchmark reports across real repositories.</p></article>
-          <article><span>05</span><strong>Agent integration</strong><p>Context packets for coding agents and editor workflows.</p></article>
+        <div class="use-case-grid">
+          <article>
+            <h3>Impact analysis before refactoring</h3>
+            <p>See dependents and affected files before editing a shared symbol.</p>
+          </article>
+          <article>
+            <h3>Understanding large codebases</h3>
+            <p>Trace services, controllers, DTOs, and database layers without opening broad folders.</p>
+          </article>
+          <article>
+            <h3>AI-assisted development</h3>
+            <p>Give agents structured context packets instead of raw repository dumps.</p>
+          </article>
+          <article>
+            <h3>Dependency visualization</h3>
+            <p>Query relationships between symbols, files, and code layers from the CLI.</p>
+          </article>
         </div>
+      </section>
+
+      <section class="section roadmap" id="roadmap">
+        <div class="section-heading">
+          <p class="label">Roadmap</p>
+          <h2>Focused milestones, not feature sprawl.</h2>
+        </div>
+        <ol>
+          <li><strong>v1</strong><span>Graph + impact analysis for TypeScript/TSX repositories.</span></li>
+          <li><strong>v2</strong><span>Semantic diff for pull requests and code review.</span></li>
+          <li><strong>v3</strong><span>AI context compiler with richer retrieval packets.</span></li>
+        </ol>
       </section>
     </main>
 
     <footer>
       <strong>Software Brain Engine</strong>
-      <span>MIT licensed. Local-first. Built for transparent AI coding workflows.</span>
+      <span>MIT licensed infrastructure for precise AI code context.</span>
+      <a href="https://github.com/sarathkumar1207/software-brain-engine">GitHub</a>
     </footer>
-    <script src="site.js"></script>
   </body>
 </html>
