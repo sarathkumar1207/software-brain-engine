@@ -4,6 +4,18 @@ Software Brain Engine (`sbe`) is a local code-intelligence CLI for TypeScript an
 
 The goal is simple: install once, run `sbe`, and give developers or AI agents the smallest useful context for a change.
 
+## Pitch
+
+AI coding tools are powerful, but they often waste context by reading too much code before they understand the change. SBE acts like a local "brain index" for your repository:
+
+- scan the repo once
+- store a local binary index under `.sbe/`
+- ask a change question such as `jwt to passport`
+- get impacted symbols, files, layers, dependencies, and token estimates
+- send the focused context to an LLM instead of the full codebase
+
+SBE is useful when the change is specific enough to map to code layers: auth migrations, API changes, DTO updates, controller/service refactors, middleware rewrites, database model changes, and similar engineering work.
+
 ## Why SBE
 
 Large codebases waste tokens when an LLM has to inspect broad folders before it can understand a focused change. SBE indexes the project locally and answers questions like:
@@ -29,6 +41,16 @@ impacted      : 24 files, 49 symbols
 tokens        : full ~9469, sbe ~5319, saved ~4150 (44%)
 query time    : 3 ms
 ```
+
+This is not a promise that every query saves tokens. Small projects or broad changes may show no savings. That honesty is the point: SBE gives benchmark evidence, not marketing-only claims.
+
+## Who Should Use It
+
+- Developers using AI coding assistants on TypeScript backends.
+- Teams that want local-first code context before sending data to an LLM.
+- Open-source maintainers who want repeatable impact analysis.
+- Agent builders who need structured context packets instead of raw repository dumps.
+- Engineers who want to benchmark token savings before pitching an AI workflow.
 
 ## Status
 
@@ -206,6 +228,7 @@ git push origin v0.2.0
 Then GitHub publishes release downloads.
 
 See [docs/install.md](docs/install.md) and [docs/release.md](docs/release.md).
+See [docs/marketing.md](docs/marketing.md) for launch messaging and community posting templates.
 
 ## Website
 
