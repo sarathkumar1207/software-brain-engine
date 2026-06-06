@@ -354,6 +354,80 @@ ul {
   font-size: 18px;
 }
 
+.case-study a {
+  color: var(--accent);
+}
+
+.case-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.case-card,
+.range-panel,
+.analytics-table {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.case-card,
+.range-panel {
+  padding: 22px;
+}
+
+.case-card p,
+.range-panel p {
+  margin-bottom: 0;
+}
+
+.case-card pre {
+  margin: 16px 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #05070b;
+}
+
+.analytics-table {
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.analytics-table div {
+  display: grid;
+  grid-template-columns: 0.8fr 1fr 1fr;
+  gap: 16px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.analytics-table div:last-child {
+  border-bottom: 0;
+}
+
+.analytics-table span {
+  color: var(--muted);
+}
+
+.analytics-table span:first-child,
+.analytics-table .table-head span {
+  color: var(--ink);
+  font-weight: 760;
+}
+
+.analytics-table .table-head {
+  background: var(--panel-2);
+}
+
+.range-panel pre {
+  margin: 0 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #05070b;
+}
+
 .diagram {
   display: grid;
   grid-template-columns: auto 1fr auto 1fr auto 1fr auto 1fr auto;
@@ -436,7 +510,8 @@ footer a {
 @media (max-width: 1040px) {
   .hero,
   .comparison,
-  .why-copy {
+  .why-copy,
+  .case-grid {
     grid-template-columns: 1fr;
   }
 
@@ -502,7 +577,9 @@ footer a {
   }
 
   .terminal-header,
+  .analytics-table div,
   footer {
+    grid-template-columns: 1fr;
     align-items: flex-start;
     flex-direction: column;
   }

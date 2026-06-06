@@ -20,6 +20,7 @@
       <nav aria-label="Primary navigation">
         <a href="#before-after">Before / After</a>
         <a href="#demo">Demo</a>
+        <a href="#case-study">Case Study</a>
         <a href="#architecture">Architecture</a>
         <a href="#roadmap">Roadmap</a>
       </nav>
@@ -160,6 +161,77 @@ affected:
           </p>
           <p>
             SBE reduces unnecessary context by retrieving code through a semantic graph. The result is smaller prompts, clearer dependency awareness, and better refactoring decisions.
+          </p>
+        </div>
+      </section>
+
+      <section class="section case-study" id="case-study">
+        <div class="section-heading">
+          <p class="label">Live Demo Case Study</p>
+          <h2>Debugging a Hono middleware lifecycle issue with graph context.</h2>
+          <p>
+            This is a realistic simulated demo using <a href="https://github.com/honojs/hono">honojs/hono</a>, a TypeScript web framework. It shows how SBE would guide an AI assistant through a multi-file middleware bug without loading broad framework context.
+          </p>
+        </div>
+
+        <div class="case-grid">
+          <article class="case-card">
+            <h3>Issue</h3>
+            <p>Middleware post-processing after <code>await next()</code> should still apply headers when a downstream handler throws and <code>onError</code> creates the final response.</p>
+            <pre><code>app.use(async (c, next) => {
+  await next()
+  c.header('x-request-processed', 'true')
+})</code></pre>
+          </article>
+
+          <article class="case-card">
+            <h3>SBE Query</h3>
+            <pre><code>$ sbe scan ./hono
+$ sbe graph compose --json
+$ sbe impact compose --json</code></pre>
+            <p>The graph starts from the middleware composition function and follows dependents into dispatch, context response mutation, factory helpers, and tests.</p>
+          </article>
+        </div>
+
+        <div class="analytics-table" role="table" aria-label="Hono demo efficiency comparison">
+          <div role="row" class="table-head">
+            <span>Metric</span>
+            <span>Without SBE</span>
+            <span>With SBE</span>
+          </div>
+          <div role="row">
+            <span>Files read</span>
+            <span>12-16 broad files</span>
+            <span>5-7 focused files</span>
+          </div>
+          <div role="row">
+            <span>Context size</span>
+            <span>~22k-30k tokens</span>
+            <span>~5k-7k tokens</span>
+          </div>
+          <div role="row">
+            <span>Dependency awareness</span>
+            <span>Manual inference</span>
+            <span>Graph-guided</span>
+          </div>
+          <div role="row">
+            <span>Estimated reduction</span>
+            <span>Baseline</span>
+            <span>~68-78%</span>
+          </div>
+        </div>
+
+        <div class="range-panel">
+          <h3>Focused file/range packet</h3>
+          <pre><code>src/compose.ts:18-102
+src/hono-base.ts:210-275
+src/context.ts:120-175
+src/types.ts:40-88
+src/helper/factory/index.ts:12-44
+src/compose.test.ts:1-90
+src/hono-base.test.ts:300-370</code></pre>
+          <p>
+            The numbers are demo estimates until reproduced against a checked-out Hono commit. The purpose is to show the SBE workflow: graph first, focused code ranges second, AI context last.
           </p>
         </div>
       </section>

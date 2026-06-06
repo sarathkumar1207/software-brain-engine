@@ -1,0 +1,49 @@
+{
+  "demo": "hono-middleware-lifecycle",
+  "repository": {
+    "name": "honojs/hono",
+    "url": "https://github.com/honojs/hono",
+    "subsystem": "middleware composition and error response lifecycle"
+  },
+  "status": "simulated_reproducible_concept",
+  "disclaimer": "This demo is not an upstream bug claim until reproduced against a specific Hono commit with a failing test.",
+  "issue": {
+    "title": "Middleware post-processing should mutate error responses created by onError",
+    "root_symbol": "compose",
+    "expected_behavior": "A middleware that awaits next() can mutate the final response, including responses created by onError.",
+    "candidate_test": "runs middleware post-processing after onError response"
+  },
+  "without_sbe": {
+    "files_read_estimate": "12-16",
+    "tokens_estimate": "22000-30000",
+    "workflow": "Broad search across middleware, dispatch, context, request, router, types, helper, and tests.",
+    "risk": "Manual lifecycle inference and unrelated context."
+  },
+  "with_sbe": {
+    "files_read_estimate": "5-7",
+    "tokens_estimate": "5000-7000",
+    "commands": [
+      "sbe scan ./hono",
+      "sbe graph compose --json",
+      "sbe impact compose --json"
+    ],
+    "focused_ranges": [
+      "src/compose.ts:18-102",
+      "src/hono-base.ts:210-275",
+      "src/context.ts:120-175",
+      "src/types.ts:40-88",
+      "src/helper/factory/index.ts:12-44",
+      "src/compose.test.ts:1-90",
+      "src/hono-base.test.ts:300-370"
+    ],
+    "estimated_token_reduction": "68-78%"
+  },
+  "contribution_path": [
+    "Clone honojs/hono",
+    "Check out a specific commit",
+    "Add the candidate regression test",
+    "Run the upstream test suite",
+    "Open an issue only if the test reproduces",
+    "Open a PR only after the fix is verified"
+  ]
+}

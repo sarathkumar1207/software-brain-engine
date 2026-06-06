@@ -72,6 +72,36 @@ This is not a promise that every query saves tokens. Small projects or broad cha
 - Agent builders who need structured context packets instead of raw repository dumps.
 - Engineers who want to benchmark token savings before pitching an AI workflow.
 
+## Live Demo: Hono Middleware Analysis
+
+SBE includes a realistic demo based on [`honojs/hono`](https://github.com/honojs/hono), focused on a middleware lifecycle issue that requires multi-file understanding.
+
+Demo question:
+
+```text
+When middleware calls await next(), does post-processing still mutate an error response created by onError?
+```
+
+SBE flow:
+
+```bash
+sbe scan ./hono
+sbe graph compose --json
+sbe impact compose --json
+```
+
+Demo estimate:
+
+| Metric | Without SBE | With SBE |
+| --- | ---: | ---: |
+| Files read | 12-16 | 5-7 |
+| Context size | ~22k-30k tokens | ~5k-7k tokens |
+| Dependency awareness | Manual inference | Graph-guided |
+
+This is a simulated, reproducible-concept demo. It is not an upstream Hono bug claim until verified against a specific Hono commit with a failing test.
+
+See [docs/demo-hono.md](docs/demo-hono.md).
+
 ## Status
 
 SBE is a production-alpha CLI. It is usable for local TypeScript/TSX validation and benchmarking, but it is not yet a full type-aware TypeScript compiler integration.
