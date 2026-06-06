@@ -1,5 +1,15 @@
 # Software Brain Engine
 
+[![Rust](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/rust.yml/badge.svg)](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/rust.yml)
+[![Release](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/release.yml/badge.svg)](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/release.yml)
+[![Website](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/pages.yml/badge.svg)](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/pages.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](crates/cli/Cargo.toml)
+[![Rust Stable](https://img.shields.io/badge/rust-stable-orange.svg)](rust-toolchain.toml)
+[![Platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](docs/install.md)
+[![Language Scope](https://img.shields.io/badge/scope-TypeScript%20%7C%20TSX-3178c6.svg)](docs/architecture.md)
+[![Status](https://img.shields.io/badge/status-production--alpha-yellow.svg)](docs/governance.md)
+
 Software Brain Engine (`sbe`) is a local code-intelligence CLI for TypeScript and TSX projects. It builds a semantic index of your repository, then returns focused impact reports for planned code changes so LLMs do not need to read the whole codebase.
 
 The goal is simple: install once, run `sbe`, and give developers or AI agents the smallest useful context for a change.
@@ -229,6 +239,7 @@ Then GitHub publishes release downloads.
 
 See [docs/install.md](docs/install.md) and [docs/release.md](docs/release.md).
 See [docs/marketing.md](docs/marketing.md) for launch messaging and community posting templates.
+See [docs/governance.md](docs/governance.md) for branch protection, PR review, and version automation rules.
 
 ## Website
 
@@ -249,6 +260,8 @@ cargo test --workspace
 cargo clippy --workspace -- -D warnings
 cargo build --release -p sbe-cli
 ```
+
+Contributions should use pull requests and Conventional Commits. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Roadmap
 

@@ -1,0 +1,94 @@
+name: Version PR
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  version-pr:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Calculate next version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          latest_subject="$(git log -1 --format='%s')"
+          if [[ "$latest_subject" =~ ^chore\(release\): ]]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Release commit detected; no version PR needed."
+            exit 0
+          fi
+
+          current="$(sed -n 's/^version = "\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)"/\1/p' crates/cli/Cargo.toml | head -n 1)"
+          latest_tag="$(git tag -l 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n 1 || true)"
+
+          if [[ -n "$latest_tag" ]]; then
+            base="${latest_tag#v}"
+            range="$latest_tag..HEAD"
+          else
+            base="$current"
+            range="HEAD"
+          fi
+
+          commits="$(git log --format='%s%n%b' "$range")"
+          IFS='.' read -r major minor patch <<< "$base"
+
+          if grep -Eq '(^|[[:space:]])BREAKING CHANGE:|^[a-zA-Z]+(\([^)]*\))?!:' <<< "$commits"; then
+            major=$((major + 1))
+            minor=0
+            patch=0
+            reason="major"
+          elif grep -Eq '^feat(\([^)]*\))?:' <<< "$commits"; then
+            minor=$((minor + 1))
+            patch=0
+            reason="minor"
+          else
+            patch=$((patch + 1))
+            reason="patch"
+          fi
+
+          next="$major.$minor.$patch"
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "next=$next" >> "$GITHUB_OUTPUT"
+          echo "reason=$reason" >> "$GITHUB_OUTPUT"
+
+          if git rev-parse "v$next" >/dev/null 2>&1; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Apply version bump
+        if: steps.version.outputs.skip == 'false'
+        shell: pwsh
+        run: ./scripts/bump-version.ps1 -Version "${{ steps.version.outputs.next }}"
+
+      - name: Create release version PR
+        if: steps.version.outputs.skip == 'false'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: automation/release-${{ steps.version.outputs.next }}
+          delete-branch: true
+          title: "chore(release): v${{ steps.version.outputs.next }}"
+          commit-message: "chore(release): v${{ steps.version.outputs.next }}"
+          body: |
+            Automated ${{ steps.version.outputs.reason }} version bump.
+
+            Merge this PR to update package metadata to v${{ steps.version.outputs.next }}.
+            The tag workflow will create `v${{ steps.version.outputs.next }}` after the merge.
