@@ -44,6 +44,12 @@ Release builds publish compressed native binaries from GitHub Actions. Developme
 cargo install --path crates/cli --force
 ```
 
+## npm
+
+SBE is not published to npm yet. Do not add an npm badge until an npm package exists.
+
+If npm support is added later, it should be a convenience installer/wrapper for the native `sbe` binary, not a replacement for the Rust CLI.
+
 ## Verify
 
 ```bash

@@ -154,6 +154,12 @@ Developer install:
 cargo install --path crates/cli --force
 ```
 
+NPM package:
+
+```text
+Not published yet. Use GitHub Releases or cargo install for now.
+```
+
 Build folders such as `target/`, `dist/`, and `artifacts/` are generated locally. They are not part of the source repo or public release.
 
 ## Quick Start
@@ -223,6 +229,31 @@ sbe export-json C:\path\to\typescript-project
 | `sbe version` | Print version and storage metadata. |
 
 `.sbe/` is local runtime index data, similar to a build cache. It is ignored by this repository and should be ignored in projects that use SBE.
+
+## FAQ
+
+### Does SBE scan `node_modules`?
+
+No. SBE skips dependency, VCS, build, and generated folders by default, including:
+
+```text
+node_modules
+.git
+.sbe
+dist
+build
+target
+.next
+coverage
+```
+
+The goal is to index source code, not installed packages or generated output.
+
+### Is SBE published on npm?
+
+Not yet. The current distribution path is GitHub Releases for binaries/installers and `cargo install` for developers.
+
+An npm package can be added later as a convenience wrapper around the native binary. Until that exists, the README intentionally does not show an npm badge.
 
 ## How SBE Optimizes Tokens
 
