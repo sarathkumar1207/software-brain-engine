@@ -2,6 +2,8 @@
 
 This document gives SBE a practical open-source launch plan and ready-to-post copy.
 
+For the current campaign sequence, use [`docs/launch-campaign.md`](launch-campaign.md). For a daily.dev-ready article draft, use [`docs/articles/daily-dev-sbe-launch.md`](articles/daily-dev-sbe-launch.md).
+
 ## Positioning
 
 Software Brain Engine is a local Rust CLI that helps AI coding tools avoid reading unnecessary code. It indexes TypeScript/TSX repositories, finds impacted symbols/files/layers for a planned change, and reports approximate token savings.

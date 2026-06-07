@@ -310,6 +310,7 @@ Then GitHub publishes release downloads.
 
 See [docs/install.md](docs/install.md) and [docs/release.md](docs/release.md).
 See [docs/marketing.md](docs/marketing.md) for launch messaging and community posting templates.
+See [docs/launch-campaign.md](docs/launch-campaign.md) for a concrete 7-day launch plan and ready-to-post copy.
 See [docs/governance.md](docs/governance.md) for branch protection, PR review, and version automation rules.
 
 ## Website
