@@ -2,7 +2,7 @@
 
 This document gives SBE a practical open-source launch plan and ready-to-post copy.
 
-For the current campaign sequence, use [`docs/launch-campaign.md`](launch-campaign.md). For a daily.dev-ready article draft, use [`docs/articles/daily-dev-sbe-launch.md`](articles/daily-dev-sbe-launch.md).
+For the current campaign sequence, use [`docs/launch-campaign.md`](launch-campaign.md). For long-form article drafts, use [`docs/articles/medium-sbe-launch.md`](articles/medium-sbe-launch.md) and [`docs/articles/daily-dev-sbe-launch.md`](articles/daily-dev-sbe-launch.md).
 
 ## Positioning
 

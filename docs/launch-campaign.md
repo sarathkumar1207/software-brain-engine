@@ -118,9 +118,12 @@ Limitations:
 I want the benchmark to show misses honestly. The goal is not magic compression; it is graph-guided context selection before an LLM reads code.
 ```
 
-### Day 3: daily.dev Article
+### Day 3: Long-Form Article
 
-Publish the article draft in [`docs/articles/daily-dev-sbe-launch.md`](articles/daily-dev-sbe-launch.md).
+Publish one long-form article on Medium or daily.dev. Use:
+
+- Medium-ready draft: [`docs/articles/medium-sbe-launch.md`](articles/medium-sbe-launch.md)
+- daily.dev-ready draft: [`docs/articles/daily-dev-sbe-launch.md`](articles/daily-dev-sbe-launch.md)
 
 Title:
 
