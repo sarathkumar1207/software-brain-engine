@@ -38,6 +38,12 @@ Best proof:
 sbe benchmark C:\repo --query "jwt to passport"
 ```
 
+Download page:
+
+```text
+https://github.com/sarathkumar1207/software-brain-engine/releases/latest
+```
+
 ## Launch Checklist
 
 Before posting widely:

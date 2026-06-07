@@ -4,6 +4,7 @@
 
 Website: [https://sarathkumar1207.github.io/software-brain-engine/](https://sarathkumar1207.github.io/software-brain-engine/)  
 GitHub: [https://github.com/sarathkumar1207/software-brain-engine](https://github.com/sarathkumar1207/software-brain-engine)
+Downloads: [https://github.com/sarathkumar1207/software-brain-engine/releases/latest](https://github.com/sarathkumar1207/software-brain-engine/releases/latest)
 
 ## The Problem: AI Coding Tools Read Too Much Code
 
@@ -428,6 +429,18 @@ Website:
 GitHub:
 
 [https://github.com/sarathkumar1207/software-brain-engine](https://github.com/sarathkumar1207/software-brain-engine)
+
+Download:
+
+[https://github.com/sarathkumar1207/software-brain-engine/releases/latest](https://github.com/sarathkumar1207/software-brain-engine/releases/latest)
+
+Platform artifacts:
+
+| Platform | Artifact |
+| --- | --- |
+| Windows x64 | `sbe-0.2.0-windows-x64.msi` |
+| Linux x64 | `sbe-linux-x64.tar.gz` |
+| macOS ARM64 | `sbe-macos-arm64.tar.gz` |
 
 Install from source:
 

@@ -126,7 +126,9 @@ Not yet:
 
 ## Install
 
-Download the release artifact for your platform.
+Download the release artifact for your platform:
+
+[GitHub Releases](https://github.com/sarathkumar1207/software-brain-engine/releases/latest)
 
 Windows:
 
@@ -140,6 +142,14 @@ Linux/macOS:
 sbe-linux-x64.tar.gz
 sbe-macos-arm64.tar.gz
 ```
+
+Download locations:
+
+| Platform | Artifact | Location |
+| --- | --- | --- |
+| Windows x64 | `sbe-0.2.0-windows-x64.msi` | [GitHub Releases](https://github.com/sarathkumar1207/software-brain-engine/releases/latest) |
+| Linux x64 | `sbe-linux-x64.tar.gz` | [GitHub Releases](https://github.com/sarathkumar1207/software-brain-engine/releases/latest) |
+| macOS ARM64 | `sbe-macos-arm64.tar.gz` | [GitHub Releases](https://github.com/sarathkumar1207/software-brain-engine/releases/latest) |
 
 After install:
 

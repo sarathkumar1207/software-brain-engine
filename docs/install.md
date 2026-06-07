@@ -10,6 +10,8 @@ SBE should install like a normal developer tool: download one installer, click i
 
 Preferred distribution is a single MSI:
 
+[GitHub Releases](https://github.com/sarathkumar1207/software-brain-engine/releases/latest)
+
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-msi.ps1 -Version 0.2.0
 ```
@@ -39,6 +41,12 @@ cargo install --path crates/cli --force
 ## macOS and Linux
 
 Release builds publish compressed native binaries from GitHub Actions. Development install:
+
+| Platform | Artifact | Location |
+| --- | --- | --- |
+| Windows x64 | `sbe-0.2.0-windows-x64.msi` | [GitHub Releases](https://github.com/sarathkumar1207/software-brain-engine/releases/latest) |
+| Linux x64 | `sbe-linux-x64.tar.gz` | [GitHub Releases](https://github.com/sarathkumar1207/software-brain-engine/releases/latest) |
+| macOS ARM64 | `sbe-macos-arm64.tar.gz` | [GitHub Releases](https://github.com/sarathkumar1207/software-brain-engine/releases/latest) |
 
 ```bash
 cargo install --path crates/cli --force

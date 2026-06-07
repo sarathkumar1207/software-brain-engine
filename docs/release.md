@@ -10,6 +10,16 @@ Publish only user-facing artifacts:
 - Linux: one compressed archive containing the `sbe` binary.
 - macOS: one compressed archive containing the `sbe` binary.
 
+Download page:
+
+[GitHub Releases](https://github.com/sarathkumar1207/software-brain-engine/releases/latest)
+
+| Platform | Artifact |
+| --- | --- |
+| Windows x64 | `sbe-0.2.0-windows-x64.msi` |
+| Linux x64 | `sbe-linux-x64.tar.gz` |
+| macOS ARM64 | `sbe-macos-arm64.tar.gz` |
+
 Do not publish:
 
 - `target/`

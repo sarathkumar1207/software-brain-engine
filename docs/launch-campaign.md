@@ -32,6 +32,7 @@ Use these URLs:
 ```text
 GitHub: https://github.com/sarathkumar1207/software-brain-engine
 Website: https://sarathkumar1207.github.io/software-brain-engine/
+Downloads: https://github.com/sarathkumar1207/software-brain-engine/releases/latest
 Demo doc: https://github.com/sarathkumar1207/software-brain-engine/blob/main/docs/demo-hono.md
 ```
 
@@ -103,6 +104,7 @@ This is production-alpha. It is syntax-based Tree-sitter analysis, not a TypeScr
 
 GitHub: https://github.com/sarathkumar1207/software-brain-engine
 Website: https://sarathkumar1207.github.io/software-brain-engine/
+Downloads: https://github.com/sarathkumar1207/software-brain-engine/releases/latest
 ```
 
 First comment:
@@ -183,6 +185,9 @@ Feedback wanted from backend engineers and AI coding tool users.
 
 GitHub:
 https://github.com/sarathkumar1207/software-brain-engine
+
+Downloads:
+https://github.com/sarathkumar1207/software-brain-engine/releases/latest
 ```
 
 ### Day 5: Reddit / Dev Communities
@@ -235,6 +240,9 @@ I am looking for feedback on:
 
 GitHub:
 https://github.com/sarathkumar1207/software-brain-engine
+
+Downloads:
+https://github.com/sarathkumar1207/software-brain-engine/releases/latest
 ```
 
 ### Day 6: LinkedIn
@@ -266,6 +274,9 @@ Looking for feedback from backend engineers, TypeScript teams, and developers us
 
 GitHub:
 https://github.com/sarathkumar1207/software-brain-engine
+
+Downloads:
+https://github.com/sarathkumar1207/software-brain-engine/releases/latest
 ```
 
 ### Day 7: Follow-up Post
