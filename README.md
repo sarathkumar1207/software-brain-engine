@@ -166,9 +166,12 @@ cargo install --path crates/cli --force
 
 NPM package:
 
-```text
-Not published yet. Use GitHub Releases or cargo install for now.
+```bash
+npm install -g sbe
+npx sbe scan .
 ```
+
+The npm package is a Node.js wrapper that downloads the native Rust binary from GitHub Releases. See [docs/npm.md](docs/npm.md).
 
 Build folders such as `target/`, `dist/`, and `artifacts/` are generated locally. They are not part of the source repo or public release.
 

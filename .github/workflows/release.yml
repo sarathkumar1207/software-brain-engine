@@ -22,12 +22,19 @@ jobs:
           - name: windows-x64
             os: windows-latest
             artifact: sbe-windows-x64
+            core_asset: sbe-core-windows-x64.exe
           - name: linux-x64
             os: ubuntu-latest
             artifact: sbe-linux-x64
+            core_asset: sbe-core-linux-x64
+          - name: macos-x64
+            os: macos-13
+            artifact: sbe-macos-x64
+            core_asset: sbe-core-macos-x64
           - name: macos-arm64
             os: macos-latest
             artifact: sbe-macos-arm64
+            core_asset: sbe-core-macos-arm64
 
     steps:
       - uses: actions/checkout@v4
@@ -45,6 +52,7 @@ jobs:
           $version = "${{ github.ref_name }}".TrimStart("v")
           if ($version -notmatch '^\d+\.\d+\.\d+$') { $version = "0.2.0" }
           .\scripts\build-msi.ps1 -Version "$version" -OutputDir artifacts
+          Copy-Item target\release\sbe.exe artifacts\${{ matrix.core_asset }}
 
       - name: Package Unix binary
         if: runner.os != 'Windows'
@@ -52,6 +60,8 @@ jobs:
         run: |
           mkdir -p artifacts
           cp target/release/sbe artifacts/sbe
+          cp target/release/sbe artifacts/${{ matrix.core_asset }}
+          chmod +x artifacts/${{ matrix.core_asset }}
           tar -czf artifacts/${{ matrix.artifact }}.tar.gz -C artifacts sbe
 
       - uses: actions/upload-artifact@v4
@@ -69,6 +79,11 @@ jobs:
         with:
           path: release-artifacts
           merge-multiple: true
+      - name: Generate checksums
+        shell: bash
+        run: |
+          cd release-artifacts
+          sha256sum sbe-core-* > checksums.txt
       - uses: softprops/action-gh-release@v2
         with:
           files: release-artifacts/*

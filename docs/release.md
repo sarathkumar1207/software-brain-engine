@@ -20,6 +20,16 @@ Download page:
 | Linux x64 | `sbe-linux-x64.tar.gz` |
 | macOS ARM64 | `sbe-macos-arm64.tar.gz` |
 
+Native assets for the npm wrapper:
+
+| Platform | Artifact |
+| --- | --- |
+| Linux x64 | `sbe-core-linux-x64` |
+| macOS x64 | `sbe-core-macos-x64` |
+| macOS ARM64 | `sbe-core-macos-arm64` |
+| Windows x64 | `sbe-core-windows-x64.exe` |
+| Checksums | `checksums.txt` |
+
 Do not publish:
 
 - `target/`
