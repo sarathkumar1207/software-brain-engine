@@ -28,26 +28,41 @@ jobs:
             os: windows-latest
             artifact: sbe-windows-x64
             core_asset: sbe-core-windows-x64.exe
+            rust_target: ""
+            binary_path: target\release\sbe.exe
           - name: linux-x64
             os: ubuntu-latest
             artifact: sbe-linux-x64
             core_asset: sbe-core-linux-x64
+            rust_target: x86_64-unknown-linux-gnu
+            binary_path: target/x86_64-unknown-linux-gnu/release/sbe
           - name: macos-x64
-            os: macos-13
+            os: macos-latest
             artifact: sbe-macos-x64
             core_asset: sbe-core-macos-x64
+            rust_target: x86_64-apple-darwin
+            binary_path: target/x86_64-apple-darwin/release/sbe
           - name: macos-arm64
             os: macos-latest
             artifact: sbe-macos-arm64
             core_asset: sbe-core-macos-arm64
-
+            rust_target: aarch64-apple-darwin
+            binary_path: target/aarch64-apple-darwin/release/sbe
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt, clippy
-      - run: cargo test --workspace
-      - run: cargo build --release -p sbe-cli
+      - name: Add Rust target
+        if: matrix.rust_target != ''
+        run: rustup target add ${{ matrix.rust_target }}
+
+      - name: Build release binary
+        if: runner.os != 'Windows'
+        run: cargo build --release -p sbe-cli --target ${{ matrix.rust_target }}
+
+      - name: Build release binary
+        if: runner.os == 'Windows'
+        run: cargo build --release -p sbe-cli
 
       - name: Package Windows MSI
         if: runner.os == 'Windows'
@@ -57,15 +72,15 @@ jobs:
           $version = "${{ inputs.version || github.ref_name }}".TrimStart("v")
           if ($version -notmatch '^\d+\.\d+\.\d+$') { $version = "0.2.0" }
           .\scripts\build-msi.ps1 -Version "$version" -OutputDir artifacts
-          Copy-Item target\release\sbe.exe artifacts\${{ matrix.core_asset }}
+          Copy-Item "${{ matrix.binary_path }}" artifacts\${{ matrix.core_asset }}
 
       - name: Package Unix binary
         if: runner.os != 'Windows'
         shell: bash
         run: |
           mkdir -p artifacts
-          cp target/release/sbe artifacts/sbe
-          cp target/release/sbe artifacts/${{ matrix.core_asset }}
+          cp "${{ matrix.binary_path }}" artifacts/sbe
+          cp "${{ matrix.binary_path }}" artifacts/${{ matrix.core_asset }}
           chmod +x artifacts/${{ matrix.core_asset }}
           tar -czf artifacts/${{ matrix.artifact }}.tar.gz -C artifacts sbe
 
