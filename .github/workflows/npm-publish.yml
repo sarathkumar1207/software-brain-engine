@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   publish:
@@ -46,8 +47,9 @@ jobs:
         run: |
           set -euo pipefail
           if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
-            echo "NPM_TOKEN secret is missing. Add an npm automation token in GitHub repository settings: Settings > Secrets and variables > Actions > New repository secret."
-            exit 1
+            echo "NPM_TOKEN secret is not set. The workflow will try npm Trusted Publishing through GitHub OIDC."
+            echo "If Trusted Publishing is not configured in npm, add an npm Automation token as the NPM_TOKEN repository secret."
+            exit 0
           fi
           npm whoami --registry=https://registry.npmjs.org
 
@@ -55,4 +57,13 @@ jobs:
         working-directory: npm/sbe
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public
+        shell: bash
+        run: |
+          set +e
+          output="$(npm publish --access public --provenance 2>&1)"
+          status=$?
+          echo "$output"
+          if [[ "$status" -ne 0 ]] && grep -q "EOTP" <<< "$output"; then
+            echo "::error::npm requires a one-time password. GitHub Actions cannot provide interactive OTP. Replace NPM_TOKEN with an npm Automation token, or configure npm Trusted Publishing for this GitHub repository and workflow."
+          fi
+          exit "$status"

@@ -98,14 +98,39 @@ sbe analyze-change "jwt to passport"
 
 1. Merge the npm package changes.
 2. Create a version release so `sbe-core-*` assets and `checksums.txt` exist.
-3. From `npm/sbe`, run:
+3. Configure npm publishing in GitHub Actions using one of these supported modes:
+
+```text
+Recommended: npm Trusted Publishing
+- npm package: sbe-cli
+- Provider: GitHub Actions
+- Repository: sarathkumar1207/software-brain-engine
+- Workflow file: npm-publish.yml
+- Environment: leave empty unless the workflow uses one
+```
+
+```text
+Alternative: npm Automation token
+- npm account settings -> Access Tokens -> Generate New Token
+- Token type must be Automation, not a normal publish token
+- GitHub repository secret name: NPM_TOKEN
+```
+
+Normal npm publish tokens can fail in CI with `EOTP` when the account has 2FA enabled. GitHub Actions cannot enter an interactive authenticator code, so use Trusted Publishing or an Automation token.
+
+4. From `npm/sbe`, validate locally:
 
 ```bash
 npm pack --dry-run
-npm publish --access public
 ```
 
-4. Verify:
+5. The GitHub workflow publishes with:
+
+```bash
+npm publish --access public --provenance
+```
+
+6. Verify after publish:
 
 ```bash
 npx sbe-cli version
