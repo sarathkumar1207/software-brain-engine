@@ -54,6 +54,10 @@ Indexed: 1120 Python files, 6524 symbols, 67320 edges
 Impact: FastAPI -> 4481 affected symbols, 706 files, depth 6
 Tokens: full ~978145, focused ~696741, saved ~281404 (29%)
 Update: 1 changed file, 3 modified symbols, 10815 ms
+
+Context Compiler v2.1:
+Command: sbe context createUser --budget 4000 --json
+Output: ranked symbols, dependency paths, callers, code ranges, deterministic summary, and reduction metrics
 ```
 
 Use the proof carefully:
@@ -62,6 +66,7 @@ Use the proof carefully:
 This is a realistic simulated demo, not an upstream Hono bug claim.
 The Fastify benchmark measures SBE's current TypeScript surface, not Fastify's JavaScript runtime files.
 The FastAPI benchmark measures SBE's Python syntax plugin, not runtime imports, decorators, or type checking.
+The Context Compiler prepares data for future AI tools but does not call an AI model.
 ```
 
 ## 7-Day Plan

@@ -71,6 +71,7 @@ sbe scan .
 sbe update .
 sbe graph createUser --json
 sbe impact saveUser --json
+sbe context createUser --budget 4000 --json
 ```
 
 `sbe update` passes through to the Rust incremental update engine. It scans file hashes, reparses changed files, refreshes the stored graph, and reports added, modified, removed, and affected symbols.
@@ -78,6 +79,13 @@ sbe impact saveUser --json
 The same commands were benchmarked against a shallow Fastify checkout. See [`docs/benchmark-fastify.md`](benchmark-fastify.md) for the scan, impact, and token results.
 
 Python support was benchmarked against FastAPI. See [`docs/benchmark-fastapi.md`](benchmark-fastapi.md) for the Python plugin scan, impact, token, and incremental update results.
+
+Context Compiler v2.1 is available through the same npm wrapper because it is implemented in the native Rust binary:
+
+```bash
+sbe context createUser
+sbe context createUser --budget 8000 --json
+```
 
 The npm wrapper adds one user-friendly alias:
 

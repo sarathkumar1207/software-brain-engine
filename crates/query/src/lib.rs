@@ -1,4 +1,5 @@
 use sbe_common::{ContextPacket, FileEntry, IndexSnapshot, Symbol};
+use sbe_context::{Budget, ContextCompilation, ContextCompiler, ContextPack};
 use sbe_graph::SemanticGraph;
 use sbe_impact::{ImpactAnalyzer, ImpactReport};
 use sbe_symbols::SymbolRegistry;
@@ -129,6 +130,16 @@ impl QueryEngine {
             .find_by_name(name)
             .into_iter()
             .map(|symbol| analyzer.analyze(symbol.id))
+            .collect()
+    }
+
+    pub fn context(&self, name: &str, budget: Option<usize>) -> Vec<ContextPack> {
+        let compiler = ContextCompiler::new(&self.graph, &self.registry);
+        let budget = budget.map(Budget::new);
+        self.registry
+            .find_by_name(name)
+            .into_iter()
+            .filter_map(|symbol| compiler.compile(symbol.id, budget))
             .collect()
     }
 
@@ -546,5 +557,38 @@ mod tests {
         let report = QueryEngine::from_snapshot(snapshot).benchmark("jwt");
 
         assert!(report.token_estimate.without_sbe_tokens > 0);
+    }
+
+    #[test]
+    fn compiles_context_pack_by_symbol_name() {
+        let snapshot = IndexSnapshot {
+            storage_version: 1,
+            root: ".".into(),
+            files: vec![FileEntry {
+                id: 1,
+                path: "missing/users.ts".into(),
+                relative_path: "src/users.ts".into(),
+                hash: "hash".into(),
+                extension: "ts".into(),
+            }],
+            symbols: vec![symbol(10, "createUser", 1), symbol(11, "saveUser", 1)],
+            imports: vec![],
+            edges: vec![sbe_common::Edge {
+                from: 10,
+                to: 11,
+                relation: sbe_common::RelationType::References,
+                range: None,
+            }],
+        };
+
+        let packs = QueryEngine::from_snapshot(snapshot).context("createUser", Some(100));
+
+        assert_eq!(packs.len(), 1);
+        assert_eq!(packs[0].root_symbol, 10);
+        assert!(packs[0]
+            .symbols
+            .iter()
+            .any(|symbol| symbol.name == "saveUser"));
+        assert!(packs[0].summary.contains("Calls saveUser"));
     }
 }

@@ -143,7 +143,7 @@ Current scope:
 - bidirectional caller/callee lookup
 - incremental index updates with `sbe update`
 - symbol version diffing for added, modified, and removed symbols
-- context preparation packets for future integrations
+- Context Compiler v2.1 for deterministic, budgeted context packs
 - impact analysis and layer classification
 - benchmark and validation reports
 - Windows MSI release workflow
@@ -241,6 +241,14 @@ Analyze a planned change:
 sbe analyze-change "jwt to passport" C:\path\to\typescript-project
 ```
 
+Compile an AI-ready context pack without calling an AI model:
+
+```powershell
+sbe context createUser C:\path\to\typescript-project
+sbe context createUser C:\path\to\typescript-project --budget 4000
+sbe context createUser C:\path\to\typescript-project --budget 8000 --json
+```
+
 Benchmark token optimization:
 
 ```powershell
@@ -281,6 +289,7 @@ sbe export-json C:\path\to\typescript-project
 | `sbe inspect <symbol> <path>` | Return context packets for a symbol. |
 | `sbe graph <symbol> <path>` | Show dependencies and dependents. |
 | `sbe impact <symbol> <path>` | Show transitive impact. |
+| `sbe context <symbol> <path>` | Compile a ranked, budgeted context pack. |
 | `sbe analyze-change <query> <path>` | Explain affected layers/files/symbols for a planned change. |
 | `sbe benchmark <path> --query <query>` | Compare full-project tokens vs focused SBE context. |
 | `sbe validate <path> --query <query>` | Scan, benchmark, and write `.sbe/reports/validation-latest.json`. |
@@ -346,11 +355,12 @@ SBE is a Rust workspace:
 - `symbols`: in-memory symbol indexes
 - `graph`: typed dependency graph with forward/reverse indexes, diffs, impact traversal, and context packs
 - `impact`: reverse dependency analysis reports
+- `context`: deterministic context compiler, ranking, budget pruning, dependency paths, and code ranges
 - `query`: context, benchmark, and change-analysis reports
 - `indexer`: full scan and incremental update pipeline
 - `cli`: user-facing command line
 
-See [docs/architecture.md](docs/architecture.md).
+See [docs/architecture.md](docs/architecture.md) and [docs/context-compiler.md](docs/context-compiler.md).
 Review hardening notes are tracked in [docs/review-issues.md](docs/review-issues.md).
 
 ## Release

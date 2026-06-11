@@ -25,12 +25,15 @@ sbe scan .
 sbe update .
 sbe graph createUser --json
 sbe impact saveUser
+sbe context createUser --budget 4000 --json
 sbe explain "jwt to passport" --json
 ```
 
 `sbe explain <flow>` maps to the Rust CLI command `sbe analyze-change <flow>`.
 
 `sbe update` incrementally refreshes changed files in an existing `.sbe` index. `sbe impact <symbol>` prints affected symbol count, affected file count, and traversal depth; use `--json` for the detailed report.
+
+`sbe context <symbol>` compiles a deterministic, budgeted context pack for future AI tools without calling an AI model.
 
 ## Supported Platforms
 

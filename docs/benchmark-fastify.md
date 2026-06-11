@@ -78,3 +78,13 @@ SBE benchmark
 The benchmark validates that SBE can scan and query a real framework type surface quickly, produce a non-trivial reverse dependency impact result, and reduce broad TypeScript context by roughly half for a focused type-system query.
 
 It also shows a current limitation clearly: JavaScript runtime implementation files in Fastify are outside SBE's current parser scope.
+
+## Context Compiler Smoke Test
+
+Command:
+
+```powershell
+cargo run -p sbe-cli -- context FastifyInstance C:\tmp\sbe-fastify-benchmark --budget 4000
+```
+
+The command returned deterministic context packs for the matching `FastifyInstance` symbols, including dependencies, callers, and context reduction metrics. Multiple same-name matches are printed as separate packs in human mode and returned as separate entries in JSON mode.

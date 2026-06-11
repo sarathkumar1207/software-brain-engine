@@ -1,17 +1,14 @@
 [package]
-name = "sbe-query"
+name = "sbe-context"
 version = "0.2.2"
 edition.workspace = true
 license.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+rustc-hash.workspace = true
 sbe-common.workspace = true
-sbe-context.workspace = true
 sbe-graph.workspace = true
-sbe-impact.workspace = true
 sbe-symbols.workspace = true
 serde.workspace = true
-
-[dev-dependencies]
-tempfile.workspace = true
+smallvec.workspace = true

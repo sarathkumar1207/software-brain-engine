@@ -12,6 +12,8 @@ Graph Intelligence v2 benchmark proof point: on a shallow Fastify checkout, SBE 
 
 Python plugin benchmark proof point: on a shallow FastAPI checkout, SBE indexed 1120 Python files into 6524 symbols and 67320 edges. `sbe impact FastAPI` reported 4481 affected symbols across 706 files at depth 6, and the focused routing/dependency benchmark reduced estimated context from ~978145 tokens to ~696741 tokens, a 29% reduction.
 
+Context Compiler v2.1 turns graph data into AI-ready context packs without calling an AI model: ranked symbols, dependency paths, callers, code ranges, token budget pruning, deterministic summaries, and context reduction metrics.
+
 Short version:
 
 ```text
