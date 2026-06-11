@@ -57,8 +57,8 @@ cargo install --path crates/cli --force
 SBE includes a publishable npm wrapper package under `npm/sbe`.
 
 ```bash
-npm install -g sbe
-npx sbe scan .
+npm install -g @sarathkumarm1207/sbe
+npx @sarathkumarm1207/sbe scan .
 ```
 
 The npm package does not compile Rust. It downloads the correct prebuilt native binary from GitHub Releases and caches it under `~/.sbe/bin/<version>/`.

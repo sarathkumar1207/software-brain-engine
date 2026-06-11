@@ -39,7 +39,11 @@ function translateArgs(args) {
 
 function runBinary(binary, args) {
   return new Promise((resolve, reject) => {
-    const child = spawn(binary, args, {
+    const command = windowsCommandScript(binary) ? (process.env.ComSpec || 'cmd.exe') : binary;
+    const commandArgs = windowsCommandScript(binary)
+      ? ['/d', '/s', '/c', buildWindowsCommand(binary, args)]
+      : args;
+    const child = spawn(command, commandArgs, {
       stdio: 'inherit',
       windowsHide: true
     });
@@ -47,6 +51,22 @@ function runBinary(binary, args) {
     child.on('error', reject);
     child.on('close', (code) => resolve(code || 0));
   });
+}
+
+function windowsCommandScript(binary) {
+  return process.platform === 'win32' && binary.toLowerCase().endsWith('.cmd');
+}
+
+function buildWindowsCommand(binary, args) {
+  return [binary, ...args].map(quoteWindowsArg).join(' ');
+}
+
+function quoteWindowsArg(value) {
+  const text = String(value);
+  if (!/[ \t"&|<>^]/.test(text)) {
+    return text;
+  }
+  return `"${text.replace(/"/g, '""')}"`;
 }
 
 module.exports = {

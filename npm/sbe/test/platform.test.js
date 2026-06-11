@@ -3,7 +3,7 @@ const path = require('node:path');
 const test = require('node:test');
 const { cacheRoot, detectPlatform } = require('../lib/platform');
 const { parseChecksum } = require('../lib/download');
-const { translateArgs } = require('../lib/runner');
+const { runBinary, translateArgs } = require('../lib/runner');
 
 test('detects supported platforms', () => {
   assert.equal(detectPlatform('linux', 'x64').assetName, 'sbe-core-linux-x64');
@@ -31,4 +31,10 @@ test('translates explain to Rust analyze-change command', () => {
     'jwt to passport',
     '--json'
   ]);
+});
+
+test('runs configured native binary wrapper', async () => {
+  const fixture = process.platform === 'win32' ? 'mock-sbe.cmd' : 'mock-sbe.sh';
+  const code = await runBinary(path.join(__dirname, 'fixtures', fixture), ['scan', '.']);
+  assert.equal(code, 0);
 });

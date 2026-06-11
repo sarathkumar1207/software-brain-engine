@@ -1,5 +1,5 @@
 {
-  "name": "sbe",
+  "name": "@sarathkumarm1207/sbe",
   "version": "0.2.0",
   "description": "Software Brain Engine CLI wrapper for the native Rust graph engine.",
   "license": "MIT",
@@ -14,6 +14,9 @@
   },
   "bin": {
     "sbe": "./bin/cli.js"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "files": [
     "bin/",

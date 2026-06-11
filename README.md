@@ -167,8 +167,8 @@ cargo install --path crates/cli --force
 NPM package:
 
 ```bash
-npm install -g sbe
-npx sbe scan .
+npm install -g @sarathkumarm1207/sbe
+npx @sarathkumarm1207/sbe scan .
 ```
 
 The npm package is a Node.js wrapper that downloads the native Rust binary from GitHub Releases. See [docs/npm.md](docs/npm.md).

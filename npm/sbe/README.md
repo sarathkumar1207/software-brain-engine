@@ -7,13 +7,13 @@ It is a Node.js wrapper around the native Rust engine. The wrapper downloads the
 ## Install
 
 ```bash
-npm install -g sbe
+npm install -g @sarathkumarm1207/sbe
 ```
 
 Or run without a global install:
 
 ```bash
-npx sbe scan .
+npx @sarathkumarm1207/sbe scan .
 ```
 
 ## Commands

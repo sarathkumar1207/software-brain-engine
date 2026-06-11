@@ -11,22 +11,24 @@ npm/sbe
 Package name:
 
 ```text
-sbe
+@sarathkumarm1207/sbe
 ```
+
+The unscoped `sbe` name is already used on npm. The scoped package still installs a binary named `sbe`.
 
 ## User Experience
 
 Global install:
 
 ```bash
-npm install -g sbe
+npm install -g @sarathkumarm1207/sbe
 sbe scan .
 ```
 
 One-off run:
 
 ```bash
-npx sbe scan .
+npx @sarathkumarm1207/sbe scan .
 ```
 
 The user does not need Rust installed.
