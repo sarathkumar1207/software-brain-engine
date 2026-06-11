@@ -55,11 +55,12 @@
           </p>
           <div class="hero-command" aria-label="Command line example">
             <span>$</span>
-            <code>sbe impact createUser --json</code>
+            <code>npm install -g sbe-cli</code>
           </div>
           <div class="hero-actions">
             <a class="button primary" href="https://github.com/sarathkumar1207/software-brain-engine">View on GitHub</a>
-            <a class="button secondary" href="https://github.com/sarathkumar1207/software-brain-engine/releases/latest">Download</a>
+            <a class="button secondary" href="https://www.npmjs.com/package/sbe-cli">npm package</a>
+            <a class="button secondary" href="https://github.com/sarathkumar1207/software-brain-engine/releases/latest">Native downloads</a>
             <a class="button secondary" href="#demo">See CLI Demo</a>
           </div>
         </div>
@@ -170,10 +171,16 @@ affected:
       <section class="section download" id="download">
         <div class="section-heading">
           <p class="label">Download</p>
-          <h2>Install SBE as a native developer tool.</h2>
-          <p>Download the latest release artifact for your platform from GitHub Releases.</p>
+          <h2>Install SBE like a normal CLI.</h2>
+          <p>Use npm for the easiest setup. The wrapper downloads the correct native Rust binary from GitHub Releases.</p>
         </div>
         <div class="download-grid">
+          <article>
+            <h3>npm</h3>
+            <code>npm install -g sbe-cli</code>
+            <img class="npm-badge" src="https://img.shields.io/npm/dm/sbe-cli.svg" alt="npm monthly downloads for sbe-cli" />
+            <a href="https://www.npmjs.com/package/sbe-cli">View package</a>
+          </article>
           <article>
             <h3>Windows x64</h3>
             <code>sbe-0.2.0-windows-x64.msi</code>
@@ -187,6 +194,11 @@ affected:
           <article>
             <h3>macOS ARM64</h3>
             <code>sbe-macos-arm64.tar.gz</code>
+            <a href="https://github.com/sarathkumar1207/software-brain-engine/releases/latest">Download archive</a>
+          </article>
+          <article>
+            <h3>macOS x64</h3>
+            <code>sbe-macos-x64.tar.gz</code>
             <a href="https://github.com/sarathkumar1207/software-brain-engine/releases/latest">Download archive</a>
           </article>
         </div>

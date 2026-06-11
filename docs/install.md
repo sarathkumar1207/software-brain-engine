@@ -46,6 +46,7 @@ Release builds publish compressed native binaries from GitHub Actions. Developme
 | --- | --- | --- |
 | Windows x64 | `sbe-0.2.0-windows-x64.msi` | [GitHub Releases](https://github.com/sarathkumar1207/software-brain-engine/releases/latest) |
 | Linux x64 | `sbe-linux-x64.tar.gz` | [GitHub Releases](https://github.com/sarathkumar1207/software-brain-engine/releases/latest) |
+| macOS x64 | `sbe-macos-x64.tar.gz` | [GitHub Releases](https://github.com/sarathkumar1207/software-brain-engine/releases/latest) |
 | macOS ARM64 | `sbe-macos-arm64.tar.gz` | [GitHub Releases](https://github.com/sarathkumar1207/software-brain-engine/releases/latest) |
 
 ```bash
@@ -58,7 +59,7 @@ SBE includes a publishable npm wrapper package under `npm/sbe`.
 
 ```bash
 npm install -g sbe-cli
-npx sbe-cli scan .
+sbe scan .
 ```
 
 The npm package does not compile Rust. It downloads the correct prebuilt native binary from GitHub Releases and caches it under `~/.sbe/bin/<version>/`.
@@ -88,4 +89,13 @@ cargo build --release -p sbe-cli
 4. GitHub Actions builds release artifacts:
    - `sbe-0.2.0-windows-x64.msi`
    - `sbe-linux-x64.tar.gz`
+   - `sbe-macos-x64.tar.gz`
    - `sbe-macos-arm64.tar.gz`
+   - `sbe-core-*` assets and `checksums.txt` for npm
+5. Publish npm only after the matching GitHub Release assets exist.
+6. Verify:
+
+```bash
+npm install -g sbe-cli
+sbe version
+```

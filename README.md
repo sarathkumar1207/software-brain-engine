@@ -12,6 +12,8 @@
 [![Release](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/release.yml/badge.svg)](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/release.yml)
 [![Website](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/pages.yml/badge.svg)](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/pages.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/sbe-cli.svg)](https://www.npmjs.com/package/sbe-cli)
+[![npm downloads](https://img.shields.io/npm/dm/sbe-cli.svg)](https://www.npmjs.com/package/sbe-cli)
 [![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](crates/cli/Cargo.toml)
 [![Rust Stable](https://img.shields.io/badge/rust-stable-orange.svg)](rust-toolchain.toml)
 [![Platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](docs/install.md)
@@ -158,20 +160,26 @@ sbe version
 sbe --help
 ```
 
-Developer install:
+Recommended npm install:
+
+```bash
+npm install -g sbe-cli
+sbe version
+sbe scan .
+```
+
+The npm package downloads the native Rust binary from GitHub Releases on install or first run. It does not require Rust.
+
+Native release downloads:
+
+- [Windows MSI](https://github.com/sarathkumar1207/software-brain-engine/releases/latest)
+- [Linux/macOS archives](https://github.com/sarathkumar1207/software-brain-engine/releases/latest)
+
+Developer source install:
 
 ```powershell
 cargo install --path crates/cli --force
 ```
-
-NPM package:
-
-```bash
-npm install -g sbe-cli
-npx sbe-cli scan .
-```
-
-The npm package is a Node.js wrapper that downloads the native Rust binary from GitHub Releases. See [docs/npm.md](docs/npm.md).
 
 Build folders such as `target/`, `dist/`, and `artifacts/` are generated locally. They are not part of the source repo or public release.
 
