@@ -17,7 +17,7 @@ Download page:
 
 | Platform | Artifact |
 | --- | --- |
-| Windows x64 | `sbe-0.2.0-windows-x64.msi` |
+| Windows x64 | `sbe-0.2.1-windows-x64.msi` |
 | Linux x64 | `sbe-linux-x64.tar.gz` |
 | macOS x64 | `sbe-macos-x64.tar.gz` |
 | macOS ARM64 | `sbe-macos-arm64.tar.gz` |
@@ -68,7 +68,7 @@ https://github.com/sarathkumar1207/software-brain-engine/releases/download/vX.Y.
 
 If the matching release assets are missing, `npm install -g sbe-cli` can install the wrapper but the first `sbe` run will fail with a 404.
 
-For manual Release workflow runs, enter the version as `0.2.0`. The workflow also normalizes `v0.2.0`, but the final GitHub Release tag must be exactly `v0.2.0`, not `vv0.2.0`.
+For manual Release workflow runs, enter the version as `0.2.1`. The workflow also normalizes `v0.2.1`, but the final GitHub Release tag must be exactly `v0.2.1`, not `vv0.2.1`.
 
 The version bump script updates crate versions, installer docs, release fallback metadata, and README version badges:
 

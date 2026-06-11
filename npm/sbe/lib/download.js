@@ -80,9 +80,25 @@ function parseChecksum(assetName, checksumsText) {
   throw new Error(`missing checksum for ${assetName}`);
 }
 
+function isTrustedDownloadUrl(url) {
+  try {
+    const { hostname, protocol } = new URL(url);
+    return (
+      protocol === 'https:' &&
+      [
+        'github.com',
+        'objects.githubusercontent.com',
+        'release-assets.githubusercontent.com'
+      ].includes(hostname)
+    );
+  } catch {
+    return false;
+  }
+}
+
 function downloadToFile(url, destination, redirects = 0) {
   return new Promise((resolve, reject) => {
-    if (!url.startsWith('https://github.com/') && !url.startsWith('https://objects.githubusercontent.com/')) {
+    if (!isTrustedDownloadUrl(url)) {
       reject(new Error(`refusing non-GitHub download URL: ${url}`));
       return;
     }
@@ -126,7 +142,7 @@ function downloadToFile(url, destination, redirects = 0) {
 
 function fetchText(url, redirects = 0) {
   return new Promise((resolve, reject) => {
-    if (!url.startsWith('https://github.com/') && !url.startsWith('https://objects.githubusercontent.com/')) {
+    if (!isTrustedDownloadUrl(url)) {
       reject(new Error(`refusing non-GitHub checksum URL: ${url}`));
       return;
     }
@@ -159,6 +175,7 @@ function fetchText(url, redirects = 0) {
 module.exports = {
   binaryPath,
   ensureBinary,
+  isTrustedDownloadUrl,
   parseChecksum,
   releaseBaseUrl,
   verifyChecksum

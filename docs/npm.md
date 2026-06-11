@@ -97,7 +97,7 @@ sbe analyze-change "jwt to passport"
 ## Publish Checklist
 
 1. Merge the npm package changes.
-2. Create the matching GitHub Release first, for example `v0.2.0`.
+2. Create the matching GitHub Release first, for example `v0.2.1`.
 3. Confirm the release contains every npm download asset:
 
 ```text
@@ -108,11 +108,11 @@ sbe-core-windows-x64.exe
 checksums.txt
 ```
 
-4. Only then publish the matching npm version, for example `sbe-cli@0.2.0`.
+4. Only then publish the matching npm version, for example `sbe-cli@0.2.1`.
 
-The npm package version and GitHub Release tag must match. `sbe-cli@0.2.0` downloads from `releases/download/v0.2.0/`.
+The npm package version and GitHub Release tag must match. `sbe-cli@0.2.1` downloads from `releases/download/v0.2.1/`.
 
-Be careful with manual releases: the tag must be `v0.2.0`, not `vv0.2.0`. A double `v` release can show assets on GitHub but still break npm downloads.
+Be careful with manual releases: the tag must be `v0.2.1`, not `vv0.2.1`. A double `v` release can show assets on GitHub but still break npm downloads.
 
 5. Configure npm publishing in GitHub Actions using one of these supported modes:
 
