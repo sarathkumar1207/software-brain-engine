@@ -11,24 +11,24 @@ npm/sbe
 Package name:
 
 ```text
-@sarathkumarm1207/sbe
+sbe-cli
 ```
 
-The unscoped `sbe` name is already used on npm. The scoped package still installs a binary named `sbe`.
+The unscoped `sbe` name is already used on npm. The package is published as `sbe-cli`, but it installs a binary named `sbe`.
 
 ## User Experience
 
 Global install:
 
 ```bash
-npm install -g @sarathkumarm1207/sbe
+npm install -g sbe-cli
 sbe scan .
 ```
 
 One-off run:
 
 ```bash
-npx @sarathkumarm1207/sbe scan .
+npx sbe-cli scan .
 ```
 
 The user does not need Rust installed.
@@ -108,6 +108,6 @@ npm publish --access public
 4. Verify:
 
 ```bash
-npx sbe version
-npx sbe scan .
+npx sbe-cli version
+npx sbe-cli scan .
 ```

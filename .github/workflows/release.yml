@@ -2,6 +2,11 @@ name: Release
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version without v prefix, for example 0.2.0"
+        required: true
+        type: string
   push:
     branches:
       - main
@@ -49,7 +54,7 @@ jobs:
         shell: powershell
         run: |
           choco install wixtoolset --no-progress -y
-          $version = "${{ github.ref_name }}".TrimStart("v")
+          $version = "${{ inputs.version || github.ref_name }}".TrimStart("v")
           if ($version -notmatch '^\d+\.\d+\.\d+$') { $version = "0.2.0" }
           .\scripts\build-msi.ps1 -Version "$version" -OutputDir artifacts
           Copy-Item target\release\sbe.exe artifacts\${{ matrix.core_asset }}
@@ -67,11 +72,14 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
-          path: artifacts/*
+          path: |
+            artifacts/${{ matrix.core_asset }}
+            artifacts/*.msi
+            artifacts/*.tar.gz
 
   publish:
     name: Publish GitHub Release
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -79,6 +87,16 @@ jobs:
         with:
           path: release-artifacts
           merge-multiple: true
+      - name: Resolve release tag
+        id: release
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "tag=v${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
       - name: Generate checksums
         shell: bash
         run: |
@@ -86,5 +104,6 @@ jobs:
           sha256sum sbe-core-* > checksums.txt
       - uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.release.outputs.tag }}
           files: release-artifacts/*
           generate_release_notes: true

@@ -1,5 +1,5 @@
 {
-  "name": "@sarathkumarm1207/sbe",
+  "name": "sbe-cli",
   "version": "0.2.0",
   "description": "Software Brain Engine CLI wrapper for the native Rust graph engine.",
   "license": "MIT",
