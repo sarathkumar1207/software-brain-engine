@@ -1,0 +1,47 @@
+{
+  "name": "@sarathkumarm1207/sbe",
+  "version": "0.2.0",
+  "description": "Software Brain Engine CLI wrapper for the native Rust graph engine.",
+  "license": "MIT",
+  "homepage": "https://sarathkumar1207.github.io/software-brain-engine/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sarathkumar1207/software-brain-engine.git",
+    "directory": "npm/sbe"
+  },
+  "bugs": {
+    "url": "https://github.com/sarathkumar1207/software-brain-engine/issues"
+  },
+  "bin": {
+    "sbe": "./bin/cli.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "scripts/",
+    "README.md"
+  ],
+  "scripts": {
+    "postinstall": "node ./scripts/postinstall.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "sbe",
+    "cli",
+    "rust",
+    "typescript",
+    "semantic-graph",
+    "code-intelligence",
+    "llm",
+    "ai-tools",
+    "developer-tools"
+  ],
+  "preferGlobal": true,
+  "dependencies": {}
+}

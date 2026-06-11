@@ -3,6 +3,7 @@
 **/.sbe/
 dist/
 artifacts/
+.npm-cache/
 *.msi
 *.wixobj
 *.wixpdb

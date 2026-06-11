@@ -1,0 +1,46 @@
+name: Publish npm
+
+on:
+  workflow_dispatch:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish @sarathkumarm1207/sbe
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Verify package version matches release tag
+        if: github.event_name == 'release'
+        working-directory: npm/sbe
+        shell: bash
+        run: |
+          set -euo pipefail
+          package_version="$(node -p "require('./package.json').version")"
+          release_version="${{ github.event.release.tag_name }}"
+          release_version="${release_version#v}"
+          if [[ "$package_version" != "$release_version" ]]; then
+            echo "package.json version $package_version does not match release $release_version"
+            exit 1
+          fi
+
+      - name: Test npm wrapper
+        working-directory: npm/sbe
+        run: node --test
+
+      - name: Publish package
+        working-directory: npm/sbe
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public

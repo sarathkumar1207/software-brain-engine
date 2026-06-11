@@ -54,9 +54,16 @@ cargo install --path crates/cli --force
 
 ## npm
 
-SBE is not published to npm yet. Do not add an npm badge until an npm package exists.
+SBE includes a publishable npm wrapper package under `npm/sbe`.
 
-If npm support is added later, it should be a convenience installer/wrapper for the native `sbe` binary, not a replacement for the Rust CLI.
+```bash
+npm install -g @sarathkumarm1207/sbe
+npx @sarathkumarm1207/sbe scan .
+```
+
+The npm package does not compile Rust. It downloads the correct prebuilt native binary from GitHub Releases and caches it under `~/.sbe/bin/<version>/`.
+
+See [npm distribution](npm.md).
 
 ## Verify
 

@@ -37,6 +37,11 @@ Get-ChildItem -Path (Join-Path $RepoRoot "crates") -Filter Cargo.toml -Recurse |
     }
 }
 
+Update-File "npm/sbe/package.json" {
+    param($Content)
+    $Content -replace '("version"\s*:\s*)"\d+\.\d+\.\d+"', "`$1`"$Version`""
+}
+
 Update-File "scripts/build-msi.ps1" {
     param($Content)
     $Content `
