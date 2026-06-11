@@ -103,29 +103,39 @@ function downloadToFile(url, destination, redirects = 0) {
       return;
     }
 
-    const file = fs.createWriteStream(destination, { mode: 0o755 });
     const request = https.get(url, { headers: { 'User-Agent': 'sbe-npm-cli' } }, (response) => {
       if ([301, 302, 303, 307, 308].includes(response.statusCode)) {
-        file.close();
-        fs.rm(destination, { force: true }, () => {});
         if (redirects >= 5) {
+          response.resume();
           reject(new Error('too many redirects'));
           return;
         }
+        response.resume();
         downloadToFile(response.headers.location, destination, redirects + 1).then(resolve, reject);
         return;
       }
 
       if (response.statusCode !== 200) {
-        file.close();
-        fs.rm(destination, { force: true }, () => {});
+        response.resume();
         reject(new Error(`download failed with HTTP ${response.statusCode}: ${url}`));
         return;
       }
 
+      const file = fs.createWriteStream(destination, { mode: 0o755 });
       response.pipe(file);
       file.on('finish', () => {
-        file.close(resolve);
+        file.close((error) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+          resolve();
+        });
+      });
+      file.on('error', (error) => {
+        response.destroy();
+        fs.rm(destination, { force: true }, () => {});
+        reject(error);
       });
     });
 
@@ -133,7 +143,6 @@ function downloadToFile(url, destination, redirects = 0) {
       request.destroy(new Error('download timed out'));
     });
     request.on('error', (error) => {
-      file.close();
       fs.rm(destination, { force: true }, () => {});
       reject(error);
     });

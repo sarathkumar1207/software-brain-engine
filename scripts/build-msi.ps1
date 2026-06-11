@@ -1,6 +1,6 @@
 param(
     [string]$Configuration = "release",
-    [string]$Version = "0.2.1",
+    [string]$Version = "0.2.2",
     [string]$OutputDir = "dist"
 )
 
@@ -8,7 +8,7 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
 if ($Version -notmatch '^\d+\.\d+\.\d+(\.\d+)?$') {
-    throw "MSI version must be numeric like 0.2.1 or 0.2.1.0. Received: $Version"
+    throw "MSI version must be numeric like 0.2.2 or 0.2.2.0. Received: $Version"
 }
 
 $root = Resolve-Path (Join-Path $PSScriptRoot "..")

@@ -70,7 +70,7 @@ jobs:
         run: |
           choco install wixtoolset --no-progress -y
           $version = "${{ inputs.version || github.ref_name }}".TrimStart("v")
-          if ($version -notmatch '^\d+\.\d+\.\d+$') { $version = "0.2.1" }
+          if ($version -notmatch '^\d+\.\d+\.\d+$') { $version = "0.2.2" }
           .\scripts\build-msi.ps1 -Version "$version" -OutputDir artifacts
           Copy-Item "${{ matrix.binary_path }}" artifacts\${{ matrix.core_asset }}
 

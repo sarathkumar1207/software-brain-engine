@@ -97,7 +97,7 @@ sbe analyze-change "jwt to passport"
 ## Publish Checklist
 
 1. Merge the npm package changes.
-2. Create the matching GitHub Release first, for example `v0.2.1`.
+2. Create the matching GitHub Release first, for example `v0.2.2`.
 3. Confirm the release contains every npm download asset:
 
 ```text
@@ -108,11 +108,11 @@ sbe-core-windows-x64.exe
 checksums.txt
 ```
 
-4. Only then publish the matching npm version, for example `sbe-cli@0.2.1`.
+4. Only then publish the matching npm version, for example `sbe-cli@0.2.2`.
 
-The npm package version and GitHub Release tag must match. `sbe-cli@0.2.1` downloads from `releases/download/v0.2.1/`.
+The npm package version and GitHub Release tag must match. `sbe-cli@0.2.2` downloads from `releases/download/v0.2.2/`.
 
-Be careful with manual releases: the tag must be `v0.2.1`, not `vv0.2.1`. A double `v` release can show assets on GitHub but still break npm downloads.
+Be careful with manual releases: the tag must be `v0.2.2`, not `vv0.2.2`. A double `v` release can show assets on GitHub but still break npm downloads.
 
 5. Configure npm publishing in GitHub Actions using one of these supported modes:
 
@@ -152,3 +152,34 @@ npm publish --access public --provenance
 npx sbe-cli version
 npx sbe-cli scan .
 ```
+
+## Troubleshooting
+
+### `refusing non-GitHub download URL`
+
+GitHub Release assets redirect through GitHub-owned CDN hosts. The npm wrapper allows:
+
+```text
+github.com
+objects.githubusercontent.com
+release-assets.githubusercontent.com
+```
+
+If this error appears, upgrade to the latest `sbe-cli` package.
+
+### `checksum validation failed: ENOENT`
+
+This means the temporary native binary disappeared before checksum verification. Older npm wrapper versions could hit this on Windows while following GitHub release redirects. Upgrade to the next patch version and clear the partial cache:
+
+```powershell
+npm uninstall -g sbe-cli
+Remove-Item -Recurse -Force "$env:USERPROFILE\.sbe\bin\0.2.1" -ErrorAction SilentlyContinue
+npm install -g sbe-cli
+sbe version
+```
+
+Use the version folder that failed in your error message.
+
+### npm version already published
+
+npm versions are immutable. If `sbe-cli@0.2.1` has a wrapper bug, publish `sbe-cli@0.2.2`; do not try to republish `0.2.1`.

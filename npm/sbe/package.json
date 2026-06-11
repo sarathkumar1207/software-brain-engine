@@ -1,6 +1,6 @@
 {
   "name": "sbe-cli",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Software Brain Engine CLI wrapper for the native Rust graph engine.",
   "license": "MIT",
   "homepage": "https://sarathkumar1207.github.io/software-brain-engine/",
