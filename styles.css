@@ -344,7 +344,7 @@ ul {
 }
 
 .download-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
 .download-grid article {
@@ -364,6 +364,12 @@ ul {
   display: block;
   max-width: 100%;
   overflow-x: auto;
+}
+
+.npm-badge {
+  width: fit-content;
+  max-width: 150px;
+  height: 20px;
 }
 
 .download-grid a {
