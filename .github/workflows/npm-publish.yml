@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   publish:
-    name: Publish @sarathkumarm1207/sbe
+    name: Publish sbe-cli
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

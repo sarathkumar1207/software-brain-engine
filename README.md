@@ -167,8 +167,8 @@ cargo install --path crates/cli --force
 NPM package:
 
 ```bash
-npm install -g @sarathkumarm1207/sbe
-npx @sarathkumarm1207/sbe scan .
+npm install -g sbe-cli
+npx sbe-cli scan .
 ```
 
 The npm package is a Node.js wrapper that downloads the native Rust binary from GitHub Releases. See [docs/npm.md](docs/npm.md).
@@ -262,11 +262,16 @@ coverage
 
 The goal is to index source code, not installed packages or generated output.
 
-### Is SBE published on npm?
+### Is SBE available through npm?
 
-Not yet. The current distribution path is GitHub Releases for binaries/installers and `cargo install` for developers.
+Yes. The npm package is `sbe-cli`, and it installs the `sbe` command.
 
-An npm package can be added later as a convenience wrapper around the native binary. Until that exists, the README intentionally does not show an npm badge.
+```bash
+npm install -g sbe-cli
+sbe scan .
+```
+
+The npm package does not compile Rust locally. It downloads the matching native binary from GitHub Releases and verifies it with `checksums.txt`.
 
 ## How SBE Optimizes Tokens
 
