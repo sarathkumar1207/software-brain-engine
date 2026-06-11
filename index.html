@@ -36,6 +36,7 @@
         <a href="#before-after">Before / After</a>
         <a href="#demo">Demo</a>
         <a href="#download">Download</a>
+        <a href="#fastify-benchmark">Benchmark</a>
         <a href="#case-study">Case Study</a>
         <a href="#architecture">Architecture</a>
         <a href="#roadmap">Roadmap</a>
@@ -120,10 +121,11 @@ context:
           <h2>A local index for code structure and change impact.</h2>
         </div>
         <div class="feature-list">
-          <div><strong>Builds a semantic graph</strong><span>Files, symbols, imports, references, and containment edges.</span></div>
+          <div><strong>Builds a typed semantic graph</strong><span>Files, symbols, imports, references, containment edges, and reverse indexes.</span></div>
           <div><strong>Extracts code structure</strong><span>Functions, classes, methods, interfaces, enums, variables, and type aliases.</span></div>
           <div><strong>Maps exact ranges</strong><span>Symbols point back to concrete source lines for retrieval.</span></div>
           <div><strong>Computes impact</strong><span>Reverse graph traversal shows what changes when a symbol changes.</span></div>
+          <div><strong>Updates incrementally</strong><span>Changed files refresh the impacted graph portions without a full rebuild.</span></div>
           <div><strong>Compresses AI context</strong><span>Send focused graph context instead of the whole repository.</span></div>
         </div>
       </section>
@@ -145,6 +147,16 @@ SBE scan complete
   elapsed       : 682 ms</code></pre>
           </article>
           <article>
+            <h3>Update</h3>
+            <pre><code>$ sbe update ./repo
+
+SBE update complete
+  changed files : 3
+  symbols       : 2 added, 4 modified, 1 removed
+  affected      : 7 symbols
+  affected files: 3</code></pre>
+          </article>
+          <article>
             <h3>Graph</h3>
             <pre><code>$ sbe graph createUser --json
 
@@ -158,12 +170,9 @@ SBE scan complete
             <h3>Impact</h3>
             <pre><code>$ sbe impact saveUser
 
-origin: saveUser
-affected:
-  UsersService.createUser
-  UsersController.create
-  AuthService.register
-  tests/users/create-user.spec.ts</code></pre>
+Affected Symbols: 24
+Affected Files: 8
+Depth: 4</code></pre>
           </article>
         </div>
       </section>
@@ -216,6 +225,43 @@ affected:
           <p>
             SBE reduces unnecessary context by retrieving code through a semantic graph. The result is smaller prompts, clearer dependency awareness, and better refactoring decisions.
           </p>
+        </div>
+      </section>
+
+      <section class="section case-study" id="fastify-benchmark">
+        <div class="section-heading">
+          <p class="label">Graph Intelligence v2 Benchmark</p>
+          <h2>Validated on a real Fastify checkout.</h2>
+          <p>
+            SBE scanned Fastify's TypeScript declaration and type-test surface, then queried the central <code>FastifyInstance</code> type to measure reverse dependency impact and focused context reduction.
+          </p>
+        </div>
+        <div class="analytics-table" role="table" aria-label="Fastify benchmark results">
+          <div role="row" class="table-head">
+            <span>Metric</span>
+            <span>Result</span>
+            <span>Command</span>
+          </div>
+          <div role="row">
+            <span>Graph size</span>
+            <span>506 symbols, 207 imports, 2700 edges</span>
+            <span><code>sbe scan</code></span>
+          </div>
+          <div role="row">
+            <span>Impact</span>
+            <span>230 symbols, 24 files, depth 4</span>
+            <span><code>sbe impact FastifyInstance</code></span>
+          </div>
+          <div role="row">
+            <span>Context estimate</span>
+            <span>~84633 full tokens to ~42335 focused tokens</span>
+            <span><code>sbe benchmark</code></span>
+          </div>
+          <div role="row">
+            <span>Reduction</span>
+            <span>~42298 tokens saved, 50%</span>
+            <span>184 ms query</span>
+          </div>
         </div>
       </section>
 
@@ -307,7 +353,7 @@ src/hono-base.test.ts:300-370</code></pre>
           <span>AI</span>
         </div>
         <p class="architecture-note">
-          V1 uses practical syntax-based TypeScript analysis through Tree-sitter. It is not a TypeScript type checker or language server. The goal is fast local graph retrieval for AI context.
+          Graph Intelligence v2 adds typed symbol nodes, forward and reverse dependency indexes, incremental updates, graph diffs, impact traversal, and context packs. SBE still uses practical syntax-based TypeScript analysis through Tree-sitter; it is not a TypeScript type checker or language server.
         </p>
       </section>
 
@@ -343,7 +389,7 @@ src/hono-base.test.ts:300-370</code></pre>
         </div>
         <ol>
           <li><strong>v1</strong><span>Graph + impact analysis for TypeScript/TSX repositories.</span></li>
-          <li><strong>v2</strong><span>Semantic diff for pull requests and code review.</span></li>
+          <li><strong>v2</strong><span>Bidirectional dependency graph, incremental updates, symbol diffs, impact summaries, and context packs.</span></li>
           <li><strong>v3</strong><span>AI context compiler with richer retrieval packets.</span></li>
         </ol>
       </section>
