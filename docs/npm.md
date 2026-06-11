@@ -77,6 +77,8 @@ sbe impact saveUser --json
 
 The same commands were benchmarked against a shallow Fastify checkout. See [`docs/benchmark-fastify.md`](benchmark-fastify.md) for the scan, impact, and token results.
 
+Python support was benchmarked against FastAPI. See [`docs/benchmark-fastapi.md`](benchmark-fastapi.md) for the Python plugin scan, impact, token, and incremental update results.
+
 The npm wrapper adds one user-friendly alias:
 
 ```bash

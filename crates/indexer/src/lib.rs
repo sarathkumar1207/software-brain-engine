@@ -702,4 +702,39 @@ mod tests {
             .iter()
             .any(|symbol| symbol.name == "deleteUser"));
     }
+
+    #[test]
+    fn indexes_python_project_end_to_end() {
+        let temp = tempfile::tempdir().unwrap();
+        std::fs::create_dir_all(temp.path().join("app")).unwrap();
+        std::fs::write(
+            temp.path().join("app/main.py"),
+            "from fastapi import FastAPI\n\napp = FastAPI()\n\ndef create_user():\n    return helper()\n\ndef helper():\n    return {'ok': True}\n",
+        )
+        .unwrap();
+
+        let mut indexer = Indexer::new(temp.path()).unwrap();
+        let report = indexer.run().unwrap();
+        let snapshot = sbe_storage::Store::open_existing(temp.path())
+            .unwrap()
+            .read_snapshot()
+            .unwrap();
+
+        assert_eq!(report.files_scanned, 1);
+        assert!(snapshot
+            .symbols
+            .iter()
+            .any(|symbol| symbol.name == "create_user"));
+        assert!(snapshot
+            .imports
+            .iter()
+            .any(|import| import.module == "fastapi"));
+        assert!(snapshot.edges.iter().any(|edge| edge.to
+            == snapshot
+                .symbols
+                .iter()
+                .find(|symbol| symbol.name == "helper")
+                .unwrap()
+                .id));
+    }
 }

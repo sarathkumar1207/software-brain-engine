@@ -6,9 +6,11 @@ For the current campaign sequence, use [`docs/launch-campaign.md`](launch-campai
 
 ## Positioning
 
-Software Brain Engine is a local Rust CLI that helps AI coding tools avoid reading unnecessary code. It indexes TypeScript/TSX repositories, finds impacted symbols/files/layers for a planned change, and reports approximate token savings.
+Software Brain Engine is a local Rust CLI that helps AI coding tools avoid reading unnecessary code. It indexes TypeScript/TSX/Python repositories, finds impacted symbols/files/layers for a planned change, and reports approximate token savings.
 
 Graph Intelligence v2 benchmark proof point: on a shallow Fastify checkout, SBE indexed 33 TypeScript declaration/type-test files into 506 symbols and 2700 edges. `sbe impact FastifyInstance` reported 230 affected symbols across 24 files at depth 4, and the focused benchmark query reduced estimated context from ~84633 tokens to ~42335 tokens, a 50% reduction.
+
+Python plugin benchmark proof point: on a shallow FastAPI checkout, SBE indexed 1120 Python files into 6524 symbols and 67320 edges. `sbe impact FastAPI` reported 4481 affected symbols across 706 files at depth 6, and the focused routing/dependency benchmark reduced estimated context from ~978145 tokens to ~696741 tokens, a 29% reduction.
 
 Short version:
 
@@ -19,7 +21,7 @@ SBE is a local code-intelligence CLI that gives LLMs focused change context inst
 One-line pitch:
 
 ```text
-I built an open-source Rust CLI that scans TypeScript repos and shows what code an LLM actually needs for a change, with token-savings benchmarks.
+I built an open-source Rust CLI that scans TypeScript and Python repos and shows what code an LLM actually needs for a change, with token-savings benchmarks.
 ```
 
 Problem:
@@ -72,13 +74,13 @@ HN usually responds better to honest technical framing than polished marketing.
 Title:
 
 ```text
-Show HN: SBE, a Rust CLI that indexes TypeScript repos for LLM context
+Show HN: SBE, a Rust CLI that indexes TypeScript and Python repos for LLM context
 ```
 
 Post text:
 
 ```text
-I built Software Brain Engine, an open-source Rust CLI for TypeScript/TSX repositories.
+I built Software Brain Engine, an open-source Rust CLI for TypeScript/TSX/Python repositories.
 
 The idea is to reduce wasted LLM context. Instead of sending broad folders or the whole repo, SBE scans locally, stores a binary .sbe index, extracts symbols/imports/references, and answers questions like:
 
@@ -115,7 +117,7 @@ Post:
 ```text
 AI coding tools are useful, but they often inspect too much code before understanding a focused change.
 
-Software Brain Engine is an open-source Rust CLI that indexes TypeScript/TSX repos locally and answers change-impact questions:
+Software Brain Engine is an open-source Rust CLI that indexes TypeScript/TSX/Python repos locally and answers change-impact questions:
 
   sbe benchmark ./repo --query "jwt to passport"
 
@@ -142,7 +144,7 @@ I am building Software Brain Engine, an open-source Rust CLI for AI-assisted sof
 
 The problem: LLM coding workflows often waste tokens by reading too much of the codebase before understanding a specific change.
 
-SBE indexes a TypeScript repository locally and answers questions like:
+SBE indexes a TypeScript or Python repository locally and answers questions like:
 
   "What changes if we migrate JWT auth to Passport?"
 
@@ -151,7 +153,7 @@ It returns impacted symbols, files, dependency paths, code layers, and an approx
 The goal is simple: give AI tools the code that matters, not the entire repository.
 
 Current alpha includes:
-- TypeScript/TSX scanning
+- TypeScript/TSX/Python scanning
 - local .sbe binary index
 - impact and graph queries
 - benchmark and validation reports
@@ -172,7 +174,7 @@ Thread:
 2/ Run:
    sbe benchmark ./repo --query "jwt to passport"
 
-SBE scans TypeScript/TSX locally and reports impacted symbols, files, layers, dependencies, and token estimates.
+SBE scans TypeScript/TSX/Python locally and reports impacted symbols, files, layers, dependencies, and token estimates.
 
 3/ Why? AI coding tools often burn context exploring broad folders. SBE creates a local .sbe index so agents can ask for focused code context first.
 
@@ -190,7 +192,7 @@ Use only communities that allow project sharing. Keep the post technical and ask
 Title:
 
 ```text
-Feedback wanted: Rust CLI for reducing LLM context in TypeScript repos
+Feedback wanted: Rust CLI for reducing LLM context in TypeScript and Python repos
 ```
 
 Post:
@@ -198,7 +200,7 @@ Post:
 ```text
 I am working on an open-source tool called Software Brain Engine.
 
-It scans a TypeScript/TSX repo locally, builds a .sbe index, and answers planned-change queries such as "jwt to passport". The output includes impacted files, symbols, layers, dependencies, and approximate full-repo vs focused-context tokens.
+It scans a TypeScript/TSX/Python repo locally, builds a .sbe index, and answers planned-change queries such as "jwt to passport" or "FastAPI dependency injection route". The output includes impacted files, symbols, layers, dependencies, and approximate full-repo vs focused-context tokens.
 
 I am not trying to claim perfect static analysis. V1 is syntax-based with Tree-sitter. The goal is to validate whether a local impact index can reduce LLM context before sending code to an AI coding tool.
 
@@ -224,7 +226,7 @@ Local code intelligence for smaller, smarter LLM context.
 Description:
 
 ```text
-Software Brain Engine indexes TypeScript repositories locally and returns focused impact reports for planned code changes, helping AI coding tools reduce unnecessary token usage.
+Software Brain Engine indexes TypeScript and Python repositories locally and returns focused impact reports for planned code changes, helping AI coding tools reduce unnecessary token usage.
 ```
 
 ## GitHub README Badges

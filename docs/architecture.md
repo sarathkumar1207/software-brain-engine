@@ -18,9 +18,20 @@ scanner -> parser -> storage
 
 The `.sbe/` directory is private to `sbe-storage`. Other crates pass typed values into storage and receive typed snapshots back. The index is stored as versioned bincode with a JSON export path for debugging.
 
-## TypeScript Boundary
+## Language Boundary
 
-V1 uses Tree-sitter syntax parsing. It extracts declarations, imports, exports, and best-effort references. It does not perform type-aware name resolution, overload resolution, or project-wide TypeScript compiler analysis.
+TypeScript and TSX use Tree-sitter syntax parsing. Python uses a local language plugin that extracts classes, functions, async functions, methods, module variables, imports, containment edges, and best-effort local references.
+
+SBE does not perform type-aware name resolution, overload resolution, project-wide TypeScript compiler analysis, Python type checking, decorator evaluation, or runtime import execution.
+
+## Parser Plugins
+
+The parser crate exposes a `LanguagePlugin` trait. The existing parser facade dispatches by file extension:
+
+- `ts` and `tsx`: Tree-sitter TypeScript plugin.
+- `py`: Python plugin.
+
+This keeps language support inside the existing parser/indexer pipeline. No database, language server, runtime execution, vector store, or LLM integration is introduced.
 
 ## Graph Intelligence v2
 

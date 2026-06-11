@@ -4,14 +4,21 @@ use sbe_common::{
 };
 use tree_sitter::{Node, Parser};
 
+pub trait LanguagePlugin {
+    fn supports(&self, extension: &str) -> bool;
+    fn parse_file(&mut self, file: &FileEntry, source: &str) -> anyhow::Result<ParsedFile>;
+}
+
 pub struct TypeScriptParser {
     inner: Parser,
+    python: PythonPlugin,
 }
 
 impl Default for TypeScriptParser {
     fn default() -> Self {
         Self {
             inner: Parser::new(),
+            python: PythonPlugin,
         }
     }
 }
@@ -22,6 +29,10 @@ impl TypeScriptParser {
     }
 
     pub fn parse_file(&mut self, file: &FileEntry, source: &str) -> anyhow::Result<ParsedFile> {
+        if self.python.supports(&file.extension) {
+            return self.python.parse_file(file, source);
+        }
+
         let language = if file.extension == "tsx" {
             tree_sitter_typescript::LANGUAGE_TSX.into()
         } else {
@@ -49,6 +60,19 @@ impl TypeScriptParser {
             imports: context.imports,
             edges: context.edges,
         })
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct PythonPlugin;
+
+impl LanguagePlugin for PythonPlugin {
+    fn supports(&self, extension: &str) -> bool {
+        extension == "py"
+    }
+
+    fn parse_file(&mut self, file: &FileEntry, source: &str) -> anyhow::Result<ParsedFile> {
+        Ok(parse_python_file(file, source))
     }
 }
 
@@ -348,6 +372,260 @@ fn node_text<'a>(node: Node, source: &'a str) -> Option<&'a str> {
     node.utf8_text(source.as_bytes()).ok()
 }
 
+#[derive(Debug, Clone, Copy)]
+struct OpenPythonSymbol {
+    indent: usize,
+    symbol_index: usize,
+}
+
+fn parse_python_file(file: &FileEntry, source: &str) -> ParsedFile {
+    let mut symbols = Vec::new();
+    let mut imports = Vec::new();
+    let mut edges = Vec::new();
+    let mut open_symbols: Vec<OpenPythonSymbol> = Vec::new();
+    let lines: Vec<&str> = source.lines().collect();
+
+    for (idx, line) in lines.iter().enumerate() {
+        let line_no = idx as u32 + 1;
+        let trimmed = line.trim_start();
+        if trimmed.is_empty() || trimmed.starts_with('#') {
+            continue;
+        }
+
+        if let Some(import) = parse_python_import(trimmed, file.id, line_no) {
+            imports.push(import);
+        }
+
+        let indent = python_indent(line);
+        if let Some((name, declaration_kind, signature)) = python_declaration(trimmed) {
+            close_python_symbols(&mut symbols, &mut open_symbols, indent, line_no);
+            let parent_symbol = open_symbols
+                .last()
+                .map(|open| symbols[open.symbol_index].id);
+            let kind = if declaration_kind == SymbolKind::Function
+                && parent_symbol
+                    .and_then(|id| symbols.iter().find(|symbol| symbol.id == id))
+                    .is_some_and(|symbol| symbol.kind == SymbolKind::Class)
+            {
+                SymbolKind::Method
+            } else {
+                declaration_kind
+            };
+            let id = symbol_id(file.id, symbols.len() as u64);
+            let exported = !name.starts_with('_');
+            let symbol = Symbol {
+                id,
+                content_hash: String::new(),
+                name,
+                kind,
+                file_id: file.id,
+                range: SourceRange {
+                    start_line: line_no,
+                    end_line: line_no,
+                    start_col: indent as u32,
+                    end_col: line.len() as u32,
+                },
+                parent_symbol,
+                visibility: if exported {
+                    Visibility::Public
+                } else {
+                    Visibility::Private
+                },
+                signature: Some(signature),
+                exported,
+            };
+            if let Some(parent_id) = parent_symbol {
+                edges.push(Edge {
+                    from: parent_id,
+                    to: id,
+                    relation: RelationType::Contains,
+                    range: Some(symbol.range.clone()),
+                });
+            }
+            symbols.push(symbol);
+            open_symbols.push(OpenPythonSymbol {
+                indent,
+                symbol_index: symbols.len() - 1,
+            });
+        } else if indent == 0 {
+            if let Some((name, signature)) = python_variable(trimmed) {
+                let id = symbol_id(file.id, symbols.len() as u64);
+                let end_col = line.len() as u32;
+                symbols.push(Symbol {
+                    id,
+                    content_hash: blake3::hash(line.as_bytes()).to_hex().to_string(),
+                    name: name.to_string(),
+                    kind: SymbolKind::Variable,
+                    file_id: file.id,
+                    range: SourceRange {
+                        start_line: line_no,
+                        end_line: line_no,
+                        start_col: 0,
+                        end_col,
+                    },
+                    parent_symbol: None,
+                    visibility: if name.starts_with('_') {
+                        Visibility::Private
+                    } else {
+                        Visibility::Public
+                    },
+                    signature: Some(signature.to_string()),
+                    exported: !name.starts_with('_'),
+                });
+            }
+        }
+    }
+
+    close_python_symbols(&mut symbols, &mut open_symbols, 0, lines.len() as u32 + 1);
+    for symbol in &mut symbols {
+        if symbol.content_hash.is_empty() {
+            symbol.content_hash = hash_source_range(source, &symbol.range);
+        }
+    }
+    add_local_reference_edges(source, &symbols, &mut edges);
+
+    ParsedFile {
+        file: file.clone(),
+        symbols,
+        imports,
+        edges,
+    }
+}
+
+fn close_python_symbols(
+    symbols: &mut [Symbol],
+    open_symbols: &mut Vec<OpenPythonSymbol>,
+    indent: usize,
+    line_no: u32,
+) {
+    while open_symbols
+        .last()
+        .is_some_and(|open| open.indent >= indent)
+    {
+        let open = open_symbols.pop().expect("open symbol exists");
+        symbols[open.symbol_index].range.end_line = line_no.saturating_sub(1);
+    }
+}
+
+fn python_declaration(trimmed: &str) -> Option<(String, SymbolKind, String)> {
+    let (kind, rest) = if let Some(rest) = trimmed.strip_prefix("async def ") {
+        (SymbolKind::Function, rest)
+    } else if let Some(rest) = trimmed.strip_prefix("def ") {
+        (SymbolKind::Function, rest)
+    } else if let Some(rest) = trimmed.strip_prefix("class ") {
+        (SymbolKind::Class, rest)
+    } else {
+        return None;
+    };
+
+    let name_end = rest
+        .find(|c: char| !(c.is_ascii_alphanumeric() || c == '_'))
+        .unwrap_or(rest.len());
+    let name = &rest[..name_end];
+    if name.is_empty() {
+        return None;
+    }
+    Some((
+        name.to_string(),
+        kind,
+        trimmed.trim_end_matches(':').to_string(),
+    ))
+}
+
+fn python_variable(trimmed: &str) -> Option<(&str, &str)> {
+    if trimmed.starts_with("if ") || trimmed.starts_with("for ") || trimmed.starts_with("while ") {
+        return None;
+    }
+    let (left, _) = trimmed.split_once('=')?;
+    if left.contains("==") || left.contains('!') || left.contains('<') || left.contains('>') {
+        return None;
+    }
+    let name = left.split(':').next().unwrap_or(left).trim();
+    if is_python_identifier(name) {
+        Some((name, trimmed))
+    } else {
+        None
+    }
+}
+
+fn parse_python_import(trimmed: &str, file_id: u64, line_no: u32) -> Option<ImportRecord> {
+    let (module, names) = if let Some(rest) = trimmed.strip_prefix("from ") {
+        let (module, names) = rest.split_once(" import ")?;
+        (module.trim().to_string(), python_import_names(names))
+    } else if let Some(rest) = trimmed.strip_prefix("import ") {
+        let names = python_import_names(rest);
+        (names.first().cloned().unwrap_or_default(), names)
+    } else {
+        return None;
+    };
+
+    Some(ImportRecord {
+        file_id,
+        module,
+        names,
+        range: SourceRange {
+            start_line: line_no,
+            end_line: line_no,
+            start_col: 0,
+            end_col: trimmed.len() as u32,
+        },
+    })
+}
+
+fn python_import_names(names: &str) -> Vec<String> {
+    names
+        .trim_matches(|c| c == '(' || c == ')')
+        .split(',')
+        .filter_map(|part| {
+            let cleaned = part.trim();
+            if cleaned.is_empty() || cleaned == "*" {
+                return None;
+            }
+            let alias_or_name = cleaned
+                .rsplit_once(" as ")
+                .map(|(_, alias)| alias)
+                .unwrap_or(cleaned);
+            let name = alias_or_name
+                .rsplit_once('.')
+                .map(|(_, name)| name)
+                .unwrap_or(alias_or_name)
+                .trim();
+            if is_python_identifier(name) {
+                Some(name.to_string())
+            } else {
+                None
+            }
+        })
+        .collect()
+}
+
+fn python_indent(line: &str) -> usize {
+    line.chars()
+        .take_while(|c| *c == ' ' || *c == '\t')
+        .map(|c| if c == '\t' { 4 } else { 1 })
+        .sum()
+}
+
+fn is_python_identifier(value: &str) -> bool {
+    let mut chars = value.chars();
+    chars
+        .next()
+        .is_some_and(|c| c == '_' || c.is_ascii_alphabetic())
+        && chars.all(|c| c == '_' || c.is_ascii_alphanumeric())
+}
+
+fn hash_source_range(source: &str, range: &SourceRange) -> String {
+    let lines: Vec<&str> = source.lines().collect();
+    let start = range.start_line.saturating_sub(1) as usize;
+    let end = (range.end_line as usize).min(lines.len());
+    let text = if start >= end {
+        String::new()
+    } else {
+        lines[start..end].join("\n")
+    };
+    blake3::hash(text.as_bytes()).to_hex().to_string()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -488,6 +766,50 @@ export function caller() {
         let mut parser = TypeScriptParser::new();
         let parsed = parser.parse_file(&file("ts"), source).unwrap();
 
+        assert!(parsed
+            .edges
+            .iter()
+            .any(|edge| edge.relation == RelationType::References));
+    }
+
+    #[test]
+    fn python_plugin_extracts_classes_functions_methods_imports_and_references() {
+        let source = r#"
+from fastapi import FastAPI
+import pydantic as pd
+
+app = FastAPI()
+
+class UserService:
+    def create_user(self):
+        return helper()
+
+def helper():
+    return "ok"
+"#;
+        let mut parser = TypeScriptParser::new();
+        let parsed = parser.parse_file(&file("py"), source).unwrap();
+
+        assert!(parsed
+            .imports
+            .iter()
+            .any(|import| import.module == "fastapi"));
+        assert!(parsed
+            .symbols
+            .iter()
+            .any(|symbol| { symbol.name == "UserService" && symbol.kind == SymbolKind::Class }));
+        assert!(parsed
+            .symbols
+            .iter()
+            .any(|symbol| symbol.name == "create_user" && symbol.kind == SymbolKind::Method));
+        assert!(parsed
+            .symbols
+            .iter()
+            .any(|symbol| symbol.name == "helper" && symbol.kind == SymbolKind::Function));
+        assert!(parsed
+            .symbols
+            .iter()
+            .any(|symbol| symbol.name == "app" && symbol.kind == SymbolKind::Variable));
         assert!(parsed
             .edges
             .iter()

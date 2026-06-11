@@ -23,7 +23,9 @@ Some of that context is useful. A lot of it is not.
 
 That is the problem I am trying to solve with **Software Brain Engine**, or **SBE**.
 
-SBE is an open-source Rust CLI that turns TypeScript/TSX repositories into semantic graphs. The goal is to retrieve the code that matters before an LLM reads source.
+SBE is an open-source Rust CLI that turns TypeScript/TSX/Python repositories into semantic graphs. The goal is to retrieve the code that matters before an LLM reads source.
+
+Graph Intelligence v2 also includes a Python language plugin. On a FastAPI checkout, SBE indexed 1120 Python files into 6524 symbols and 67320 edges, then reported 4481 affected symbols for `FastAPI`.
 
 ## The Basic Idea
 
@@ -123,7 +125,7 @@ Important: this is a simulated reproducible-concept demo, not a claim that Hono 
 
 Current alpha scope:
 
-- TypeScript/TSX scanning
+- TypeScript/TSX/Python scanning
 - Tree-sitter syntax parsing
 - symbol extraction
 - import/reference edges
@@ -152,7 +154,7 @@ SBE is production-alpha, not a finished static analysis platform.
 
 Current limitations:
 
-- TypeScript/TSX only
+- TypeScript/TSX/Python source support
 - syntax-based, not type-aware yet
 - approximate token estimates
 - no watch mode yet

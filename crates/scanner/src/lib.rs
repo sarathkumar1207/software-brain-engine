@@ -22,7 +22,7 @@ impl Scanner {
     pub fn new(root: impl Into<PathBuf>) -> Self {
         Self {
             root: root.into(),
-            extensions: vec!["ts".into(), "tsx".into()],
+            extensions: vec!["ts".into(), "tsx".into(), "py".into()],
         }
     }
 
@@ -142,7 +142,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn scans_typescript_and_ignores_generated_folders() {
+    fn scans_supported_languages_and_ignores_generated_folders() {
         let temp = tempfile::tempdir().unwrap();
         std::fs::create_dir_all(temp.path().join("src")).unwrap();
         std::fs::create_dir_all(temp.path().join("node_modules/pkg")).unwrap();
@@ -152,12 +152,13 @@ mod tests {
             "export const View = () => <div />",
         )
         .unwrap();
+        std::fs::write(temp.path().join("src/service.py"), "def service(): pass").unwrap();
         std::fs::write(temp.path().join("src/readme.md"), "# no").unwrap();
         std::fs::write(temp.path().join("node_modules/pkg/index.ts"), "ignored").unwrap();
 
         let report = Scanner::new(temp.path()).scan_with_report().unwrap();
 
-        assert_eq!(report.files.len(), 2);
+        assert_eq!(report.files.len(), 3);
         assert!(report
             .files
             .iter()
@@ -166,6 +167,10 @@ mod tests {
             .files
             .iter()
             .any(|file| file.relative_path == "src/view.tsx"));
+        assert!(report
+            .files
+            .iter()
+            .any(|file| file.relative_path == "src/service.py"));
         assert!(report
             .skipped_dirs
             .iter()

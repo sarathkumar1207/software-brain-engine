@@ -42,7 +42,7 @@ That is why I am building **Software Brain Engine**, or **SBE**.
 
 ## What Is Software Brain Engine?
 
-**Software Brain Engine** is an open-source Rust CLI that turns TypeScript and TSX repositories into a local semantic graph.
+**Software Brain Engine** is an open-source Rust CLI that turns TypeScript, TSX, and Python repositories into a local semantic graph.
 
 Instead of sending the entire repository to an LLM, SBE helps retrieve only the relevant code context.
 
@@ -76,6 +76,8 @@ SBE returns:
 - JSON output for AI agents and tools
 
 On a real Fastify checkout, Graph Intelligence v2 indexed 33 TypeScript declaration/type-test files into 506 symbols and 2700 edges. The `FastifyInstance` impact query reported 230 affected symbols across 24 files at depth 4, and the focused benchmark query reduced estimated context from ~84633 tokens to ~42335 tokens.
+
+On a real FastAPI checkout, the Python plugin indexed 1120 Python files into 6524 symbols and 67320 edges. The `FastAPI` impact query reported 4481 affected symbols across 706 files at depth 6, and the focused routing/dependency benchmark reduced estimated context from ~978145 tokens to ~696741 tokens.
 
 The goal is not to replace the developer.
 
@@ -236,7 +238,7 @@ SBE is currently a **production-alpha** developer tool.
 Current capabilities:
 
 - Rust CLI
-- TypeScript and TSX scanning
+- TypeScript, TSX, and Python scanning
 - Tree-sitter syntax parsing
 - symbol extraction
 - import extraction
@@ -295,7 +297,7 @@ SBE is not a magic AI brain.
 
 Current limitations:
 
-- TypeScript/TSX only
+- TypeScript/TSX/Python source support
 - syntax-based analysis, not full TypeScript type checking
 - approximate token estimates
 - no exact tokenizer yet
