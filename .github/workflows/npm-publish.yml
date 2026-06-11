@@ -39,6 +39,18 @@ jobs:
         working-directory: npm/sbe
         run: node --test
 
+      - name: Check npm authentication
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
+            echo "NPM_TOKEN secret is missing. Add an npm automation token in GitHub repository settings: Settings > Secrets and variables > Actions > New repository secret."
+            exit 1
+          fi
+          npm whoami --registry=https://registry.npmjs.org
+
       - name: Publish package
         working-directory: npm/sbe
         env:

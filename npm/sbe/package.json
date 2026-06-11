@@ -13,7 +13,7 @@
     "url": "https://github.com/sarathkumar1207/software-brain-engine/issues"
   },
   "bin": {
-    "sbe": "./bin/cli.js"
+    "sbe": "bin/cli.js"
   },
   "publishConfig": {
     "access": "public"
