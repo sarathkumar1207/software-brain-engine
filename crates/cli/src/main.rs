@@ -1,8 +1,10 @@
 use clap::{Parser, Subcommand};
+use sbe_impact::ImpactReport;
 use sbe_indexer::{IndexReport, Indexer};
 use sbe_query::{BenchmarkReport, QueryEngine};
 use sbe_storage::Store;
 use serde::Serialize;
+use std::collections::HashSet;
 use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
@@ -49,6 +51,13 @@ enum Commands {
         json: bool,
         #[arg(default_value = ".")]
         path: PathBuf,
+    },
+    /// Incrementally update the existing index from changed files.
+    Update {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(long)]
+        json: bool,
     },
     /// Analyze a planned change for AI-focused impact and token savings.
     AnalyzeChange {
@@ -198,10 +207,33 @@ fn main() -> anyhow::Result<()> {
             } else if reports.is_empty() {
                 println!("no symbols found for {name}");
             } else {
-                for report in reports {
-                    println!("origin: {}", report.origin);
-                    for affected in report.affected {
-                        println!("affected: {} {:?}", affected.name, affected.kind);
+                print_impact_summary(&reports);
+            }
+        }
+        Commands::Update { path, json } => {
+            let mut indexer = Indexer::new(path)?;
+            let report = indexer.update()?;
+            if json {
+                println!("{}", serde_json::to_string_pretty(&report)?);
+            } else {
+                println!("SBE update complete");
+                println!("  changed files : {}", report.changed_files.len());
+                println!(
+                    "  symbols       : {} added, {} modified, {} removed",
+                    report.added_symbols, report.modified_symbols, report.removed_symbols
+                );
+                println!(
+                    "  affected      : {} symbols",
+                    report.affected_symbols.len()
+                );
+                println!("  affected files: {}", report.affected_files);
+                println!("  graph         : {} edges", report.edges_found);
+                println!("  elapsed       : {} ms", report.elapsed_ms);
+                println!("  storage       : {}", report.storage_path);
+                if !report.warnings.is_empty() {
+                    println!("  warnings      : {}", report.warnings.len());
+                    for warning in report.warnings.iter().take(5) {
+                        println!("    - {warning}");
                     }
                 }
             }
@@ -338,6 +370,26 @@ fn main() -> anyhow::Result<()> {
     }
 
     Ok(())
+}
+
+fn print_impact_summary(reports: &[ImpactReport]) {
+    let affected_symbols: HashSet<u64> = reports
+        .iter()
+        .flat_map(|report| report.affected_symbols.iter().copied())
+        .collect();
+    let affected_files: HashSet<u64> = reports
+        .iter()
+        .flat_map(|report| report.affected.iter().map(|symbol| symbol.file_id))
+        .collect();
+    let depth = reports
+        .iter()
+        .map(|report| report.depth)
+        .max()
+        .unwrap_or_default();
+
+    println!("Affected Symbols: {}", affected_symbols.len());
+    println!("Affected Files: {}", affected_files.len());
+    println!("Depth: {}", depth);
 }
 
 fn print_benchmark(report: &BenchmarkReport) {

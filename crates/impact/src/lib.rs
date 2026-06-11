@@ -1,13 +1,15 @@
 use sbe_common::Symbol;
-use sbe_graph::SemanticGraph;
+use sbe_graph::{ImpactAnalysis, ImpactResult, SemanticGraph, SymbolId};
 use sbe_symbols::SymbolRegistry;
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ImpactReport {
-    pub origin: u64,
+    pub origin: SymbolId,
     pub affected: Vec<Symbol>,
+    pub affected_symbols: Vec<SymbolId>,
+    pub depth: usize,
+    pub affected_files: usize,
 }
 
 pub struct ImpactAnalyzer<'a> {
@@ -20,31 +22,32 @@ impl<'a> ImpactAnalyzer<'a> {
         Self { graph, registry }
     }
 
-    pub fn analyze(&self, symbol_id: u64) -> ImpactReport {
-        let mut visited = HashSet::new();
-        let mut discovered = HashSet::from([symbol_id]);
-        let mut queue = vec![symbol_id];
-        let mut affected = Vec::new();
+    pub fn analyze(&self, symbol_id: SymbolId) -> ImpactReport {
+        self.analyze_with_max_depth(symbol_id, None)
+    }
 
-        while let Some(current) = queue.pop() {
-            if !visited.insert(current) {
-                continue;
-            }
+    pub fn analyze_with_max_depth(
+        &self,
+        symbol_id: SymbolId,
+        max_depth: Option<usize>,
+    ) -> ImpactReport {
+        let result = self.graph.impact_with_max_depth(symbol_id, max_depth);
+        self.report(symbol_id, result)
+    }
 
-            for dependent in self.graph.dependents(current) {
-                if visited.contains(&dependent) || !discovered.insert(dependent) {
-                    continue;
-                }
-                if let Some(symbol) = self.registry.get(dependent) {
-                    affected.push(symbol.clone());
-                    queue.push(dependent);
-                }
-            }
-        }
+    fn report(&self, origin: SymbolId, result: ImpactResult) -> ImpactReport {
+        let affected = result
+            .affected_symbols
+            .iter()
+            .filter_map(|id| self.registry.get(*id).cloned())
+            .collect();
 
         ImpactReport {
-            origin: symbol_id,
+            origin,
             affected,
+            affected_symbols: result.affected_symbols,
+            depth: result.depth,
+            affected_files: result.affected_files,
         }
     }
 }
@@ -54,13 +57,13 @@ mod tests {
     use super::*;
     use sbe_common::{Edge, RelationType, SourceRange, SymbolKind, Visibility};
 
-    fn symbol(id: u64) -> Symbol {
+    fn symbol(id: u64, file_id: u64) -> Symbol {
         Symbol {
             id,
-            content_hash: "hash".into(),
+            content_hash: format!("hash{id}"),
             name: format!("s{id}"),
             kind: SymbolKind::Function,
-            file_id: 1,
+            file_id,
             range: SourceRange {
                 start_line: 1,
                 end_line: 1,
@@ -74,32 +77,50 @@ mod tests {
         }
     }
 
+    fn edge(from: u64, to: u64) -> Edge {
+        Edge {
+            from,
+            to,
+            relation: RelationType::References,
+            range: None,
+        }
+    }
+
     #[test]
     fn returns_transitive_dependents_through_cycles() {
-        let registry = SymbolRegistry::build(vec![symbol(1), symbol(2), symbol(3)]);
-        let graph = SemanticGraph::build(&[
-            Edge {
-                from: 2,
-                to: 1,
-                relation: RelationType::References,
-                range: None,
-            },
-            Edge {
-                from: 3,
-                to: 2,
-                relation: RelationType::References,
-                range: None,
-            },
-            Edge {
-                from: 1,
-                to: 3,
-                relation: RelationType::References,
-                range: None,
-            },
-        ]);
+        let registry = SymbolRegistry::build(vec![symbol(1, 1), symbol(2, 1), symbol(3, 2)]);
+        let graph = SemanticGraph::from_snapshot(&sbe_common::IndexSnapshot {
+            storage_version: 1,
+            root: ".".into(),
+            files: vec![],
+            symbols: vec![symbol(1, 1), symbol(2, 1), symbol(3, 2)],
+            imports: vec![],
+            edges: vec![edge(2, 1), edge(3, 2), edge(1, 3)],
+        });
 
         let report = ImpactAnalyzer::new(&graph, &registry).analyze(1);
 
         assert_eq!(report.affected.len(), 2);
+        assert_eq!(report.affected_symbols.len(), 2);
+        assert_eq!(report.depth, 2);
+        assert_eq!(report.affected_files, 2);
+    }
+
+    #[test]
+    fn respects_max_depth() {
+        let registry = SymbolRegistry::build(vec![symbol(1, 1), symbol(2, 1), symbol(3, 2)]);
+        let graph = SemanticGraph::from_snapshot(&sbe_common::IndexSnapshot {
+            storage_version: 1,
+            root: ".".into(),
+            files: vec![],
+            symbols: vec![symbol(1, 1), symbol(2, 1), symbol(3, 2)],
+            imports: vec![],
+            edges: vec![edge(2, 1), edge(3, 2)],
+        });
+
+        let report = ImpactAnalyzer::new(&graph, &registry).analyze_with_max_depth(1, Some(1));
+
+        assert_eq!(report.affected_symbols, vec![2]);
+        assert_eq!(report.depth, 1);
     }
 }

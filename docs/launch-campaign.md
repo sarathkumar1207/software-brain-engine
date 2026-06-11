@@ -43,12 +43,18 @@ Hono middleware demo:
 Without SBE: 12-16 files, ~22k-30k tokens
 With SBE: 5-7 files, ~5k-7k tokens
 Estimated reduction: ~68-78%
+
+Fastify Graph Intelligence v2 benchmark:
+Indexed: 33 TypeScript declaration/type-test files, 506 symbols, 2700 edges
+Impact: FastifyInstance -> 230 affected symbols, 24 files, depth 4
+Tokens: full ~84633, focused ~42335, saved ~42298 (50%)
 ```
 
 Use the proof carefully:
 
 ```text
 This is a realistic simulated demo, not an upstream Hono bug claim.
+The Fastify benchmark measures SBE's current TypeScript surface, not Fastify's JavaScript runtime files.
 ```
 
 ## 7-Day Plan
@@ -91,6 +97,7 @@ The problem: AI coding tools often read too much code before they understand a f
 SBE scans a repo locally, stores a .sbe index, extracts symbols/imports/references, and lets you query the semantic graph:
 
   sbe scan ./repo
+  sbe update ./repo
   sbe graph createUser --json
   sbe impact createUser --json
 
@@ -152,6 +159,7 @@ I built SBE to attack that problem.
 
 Run:
   sbe scan ./repo
+  sbe update ./repo
   sbe graph createUser --json
   sbe impact createUser --json
 
@@ -218,6 +226,7 @@ SBE scans a repo locally and builds a semantic graph:
 Example:
 
   sbe scan ./repo
+  sbe update ./repo
   sbe graph createUser --json
   sbe impact createUser --json
 
@@ -254,6 +263,8 @@ The problem: AI coding tools often read too much code before understanding the a
 
 SBE scans a TypeScript repository locally and builds a semantic graph. Instead of sending broad folders to an LLM, you can ask:
 
+  sbe scan ./repo
+  sbe update ./repo
   sbe graph createUser --json
   sbe impact createUser --json
 

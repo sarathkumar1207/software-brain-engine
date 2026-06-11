@@ -68,9 +68,14 @@ Most commands pass directly to the Rust binary:
 
 ```bash
 sbe scan .
+sbe update .
 sbe graph createUser --json
 sbe impact saveUser --json
 ```
+
+`sbe update` passes through to the Rust incremental update engine. It scans file hashes, reparses changed files, refreshes the stored graph, and reports added, modified, removed, and affected symbols.
+
+The same commands were benchmarked against a shallow Fastify checkout. See [`docs/benchmark-fastify.md`](benchmark-fastify.md) for the scan, impact, and token results.
 
 The npm wrapper adds one user-friendly alias:
 

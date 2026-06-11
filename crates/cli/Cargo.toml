@@ -13,6 +13,7 @@ path = "src/main.rs"
 anyhow.workspace = true
 clap.workspace = true
 sbe-common.workspace = true
+sbe-impact.workspace = true
 sbe-indexer.workspace = true
 sbe-query.workspace = true
 sbe-storage.workspace = true

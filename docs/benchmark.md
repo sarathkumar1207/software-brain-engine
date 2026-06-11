@@ -2,6 +2,8 @@
 
 SBE benchmarks are intended to prove whether local indexing reduces LLM context for a planned code change.
 
+For a real framework benchmark, see [benchmark-fastify.md](benchmark-fastify.md). The Fastify run indexed 33 TypeScript declaration/type-test files, built 506 symbols and 2700 edges, reported 230 affected symbols for `FastifyInstance`, and reduced a focused type-query estimate by 50%.
+
 ## What Is Measured
 
 `sbe benchmark <path> --query "<change>"` reports:
