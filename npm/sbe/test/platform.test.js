@@ -1,8 +1,10 @@
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 const test = require('node:test');
 const { cacheRoot, detectPlatform } = require('../lib/platform');
-const { isTrustedDownloadUrl, parseChecksum } = require('../lib/download');
+const { isTrustedDownloadUrl, parseChecksum, verifyChecksum } = require('../lib/download');
 const { runBinary, translateArgs } = require('../lib/runner');
 
 test('detects supported platforms', () => {
@@ -31,6 +33,19 @@ test('allows GitHub release asset redirect host', () => {
   assert.equal(isTrustedDownloadUrl('https://release-assets.githubusercontent.com/github-production-release-asset/file'), true);
   assert.equal(isTrustedDownloadUrl('https://example.com/tool.exe'), false);
   assert.equal(isTrustedDownloadUrl('http://github.com/owner/repo/releases/download/v1.0.0/tool.exe'), false);
+});
+
+test('verifies checksum for downloaded temp file', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sbe-npm-'));
+  const file = path.join(dir, 'sbe-core.tmp');
+  fs.writeFileSync(file, 'native-binary');
+  try {
+    verifyChecksum(file, 'sbe-core-windows-x64.exe', [
+      '9ec4c62cbabe2558224228ab3254a4e20e24cdf57a2cf3be50f37111723595e5  sbe-core-windows-x64.exe'
+    ].join('\n'));
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test('translates explain to Rust analyze-change command', () => {
