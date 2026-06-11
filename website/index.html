@@ -126,6 +126,7 @@ context:
           <div><strong>Maps exact ranges</strong><span>Symbols point back to concrete source lines for retrieval.</span></div>
           <div><strong>Computes impact</strong><span>Reverse graph traversal shows what changes when a symbol changes.</span></div>
           <div><strong>Updates incrementally</strong><span>Changed files refresh the impacted graph portions without a full rebuild.</span></div>
+          <div><strong>Compiles context packs</strong><span>Ranked symbols, dependency paths, callers, code ranges, metrics, and token budgets.</span></div>
           <div><strong>Compresses AI context</strong><span>Send focused graph context instead of the whole repository.</span></div>
         </div>
       </section>
@@ -173,6 +174,22 @@ SBE update complete
 Affected Symbols: 24
 Affected Files: 8
 Depth: 4</code></pre>
+          </article>
+          <article>
+            <h3>Context</h3>
+            <pre><code>$ sbe context createUser --budget 4000
+
+Root Symbol: createUser
+
+Dependencies:
+* validateEmail
+* saveUser
+
+Callers:
+* AuthController
+
+Context Reduction:
+99.2%</code></pre>
           </article>
         </div>
       </section>
@@ -378,7 +395,7 @@ src/hono-base.test.ts:300-370</code></pre>
           <span>AI</span>
         </div>
         <p class="architecture-note">
-          Graph Intelligence v2 adds typed symbol nodes, forward and reverse dependency indexes, incremental updates, graph diffs, impact traversal, and context packs. SBE uses Tree-sitter for TypeScript/TSX and a built-in Python plugin for Python source; it is not a type checker, language server, or Python runtime analyzer.
+          Graph Intelligence v2 adds typed symbol nodes, forward and reverse dependency indexes, incremental updates, graph diffs, impact traversal, and context packs. Context Compiler v2.1 ranks graph symbols, applies token budgets, extracts dependency paths, and emits minimal code ranges without calling an AI model. SBE uses Tree-sitter for TypeScript/TSX and a built-in Python plugin for Python source; it is not a type checker, language server, or Python runtime analyzer.
         </p>
       </section>
 
@@ -416,6 +433,7 @@ src/hono-base.test.ts:300-370</code></pre>
           <li><strong>v1</strong><span>Graph + impact analysis for TypeScript/TSX repositories.</span></li>
           <li><strong>v2</strong><span>Bidirectional dependency graph, incremental updates, symbol diffs, impact summaries, and context packs.</span></li>
           <li><strong>v2.1</strong><span>Python language plugin for classes, functions, imports, references, and FastAPI-scale benchmarks.</span></li>
+          <li><strong>v2.1</strong><span>Context Compiler with ranking, token budgets, dependency paths, deterministic summaries, and reduction metrics.</span></li>
           <li><strong>v3</strong><span>AI context compiler with richer retrieval packets.</span></li>
         </ol>
       </section>

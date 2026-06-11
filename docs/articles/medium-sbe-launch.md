@@ -79,6 +79,8 @@ On a real Fastify checkout, Graph Intelligence v2 indexed 33 TypeScript declarat
 
 On a real FastAPI checkout, the Python plugin indexed 1120 Python files into 6524 symbols and 67320 edges. The `FastAPI` impact query reported 4481 affected symbols across 706 files at depth 6, and the focused routing/dependency benchmark reduced estimated context from ~978145 tokens to ~696741 tokens.
 
+Context Compiler v2.1 is the next layer: it turns graph results into deterministic context packs with ranked symbols, dependency paths, callers, code ranges, summaries, token budgets, and reduction metrics. It prepares context for future AI tools without calling an AI model.
+
 The goal is not to replace the developer.
 
 The goal is to give AI systems better code context before they start reading source.

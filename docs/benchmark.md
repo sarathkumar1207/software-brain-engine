@@ -6,6 +6,14 @@ For a real framework benchmark, see [benchmark-fastify.md](benchmark-fastify.md)
 
 For a Python framework benchmark, see [benchmark-fastapi.md](benchmark-fastapi.md). The FastAPI run indexed 1120 Python files, built 6524 symbols and 67320 edges, reported 4481 affected symbols for `FastAPI`, and reduced a broad routing/dependency query estimate by 29%.
 
+Context Compiler v2.1 can be benchmarked separately with:
+
+```bash
+sbe context <symbol> --budget 4000 --json
+```
+
+The output includes selected symbols, selected files, estimated tokens, and context reduction percentage.
+
 ## What Is Measured
 
 `sbe benchmark <path> --query "<change>"` reports:

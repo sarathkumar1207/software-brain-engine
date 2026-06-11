@@ -7,9 +7,10 @@ Software Brain Engine is a modular Rust workspace. Each crate has one responsibi
 ```text
 scanner -> parser -> storage
                  \-> symbols -> graph -> impact -> query -> cli
-                         ^          ^
-                         |          |
-                      update      context
+                               \-> context -/
+                         ^
+                         |
+                      update
 ```
 
 `indexer` orchestrates scanning, parsing, persistence, and incremental updates. The CLI calls the indexer for writes and the query layer for reads.
@@ -46,6 +47,18 @@ The graph crate upgrades SBE from a symbol-only graph into a typed dependency gr
 - `ContextPack` prepares root symbol, dependencies, callers, and file ranges for future retrieval integrations.
 
 No database, vector store, or LLM integration sits in this layer. It remains an in-memory graph over the stored snapshot.
+
+## Context Compiler v2.1
+
+The `sbe-context` crate turns graph data into deterministic, budgeted context packs:
+
+- `compiler.rs`: root lookup, dependency/caller expansion, ranking, budget pruning, and pack assembly.
+- `ranking.rs`: configurable importance scoring from direct dependency weight, caller count, impact score, graph depth, and module crossings.
+- `budget.rs`: token budget pruning that never removes the root symbol or direct dependencies.
+- `pack.rs`: future-compatible `ContextPack`, `ContextSymbol`, `DependencyPath`, `CodeRange`, and `ContextMetrics` data structures.
+- `builder.rs`: typed pack builder.
+
+The compiler does not call AI models, generate embeddings, implement MCP, or perform vector search. It prepares minimal context for future integrations.
 
 ## Incremental Updates
 

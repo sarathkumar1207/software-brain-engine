@@ -7,6 +7,7 @@ members = [
   "crates/symbols",
   "crates/graph",
   "crates/impact",
+  "crates/context",
   "crates/query",
   "crates/indexer",
   "crates/cli",
@@ -25,8 +26,10 @@ blake3 = "1"
 clap = { version = "4", features = ["derive"] }
 petgraph = "0.6"
 rayon = "1"
+rustc-hash = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+smallvec = "1"
 tempfile = "3"
 thiserror = "1"
 tracing = "0.1"
@@ -41,5 +44,6 @@ sbe-parser = { path = "crates/parser" }
 sbe-symbols = { path = "crates/symbols" }
 sbe-graph = { path = "crates/graph" }
 sbe-impact = { path = "crates/impact" }
+sbe-context = { path = "crates/context" }
 sbe-query = { path = "crates/query" }
 sbe-indexer = { path = "crates/indexer" }

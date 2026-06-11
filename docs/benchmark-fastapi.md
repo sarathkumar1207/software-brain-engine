@@ -107,6 +107,45 @@ SBE update complete
 
 The update path avoided a full reparse, but import-edge refresh remains a visible cost on large Python repositories. That is a concrete optimization target for the next graph/indexer pass.
 
+## Context Compiler
+
+Command:
+
+```powershell
+cargo run -p sbe-cli -- context FastAPI C:\tmp\sbe-fastapi-benchmark --budget 4000
+```
+
+Human output included:
+
+```text
+Root Symbol: FastAPI
+
+Dependencies:
+* AppType
+* DecoratedCallable
+* Default
+* Depends
+* HTTPException
+* RequestValidationError
+* Response
+* State
+...
+
+Context Reduction:
+99.4%
+```
+
+JSON output included:
+
+```text
+symbols_selected: 41
+files_selected: 15
+estimated_tokens: 193560
+context_reduction_percent: 99.4
+```
+
+The requested budget was `4000` tokens, but the output can exceed that when the root symbol and direct dependencies alone exceed the budget. That is intentional: the compiler never removes the root symbol or direct dependencies.
+
 ## Result
 
 The benchmark validates that SBE can index and query a large Python framework repository with the new Python plugin:
@@ -117,3 +156,4 @@ The benchmark validates that SBE can index and query a large Python framework re
 - Central framework impact queries returned thousands of affected symbols with bounded BFS depth.
 - Focused context estimation reduced a broad FastAPI dependency/routing query by 29%.
 - Incremental update detected one changed file and three modified symbols.
+- Context Compiler v2.1 produced a deterministic, budget-aware context pack with ranked symbols, dependency paths, callers, code ranges, and reduction metrics.

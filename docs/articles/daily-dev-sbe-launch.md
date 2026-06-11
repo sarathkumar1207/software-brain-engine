@@ -27,6 +27,8 @@ SBE is an open-source Rust CLI that turns TypeScript/TSX/Python repositories int
 
 Graph Intelligence v2 also includes a Python language plugin. On a FastAPI checkout, SBE indexed 1120 Python files into 6524 symbols and 67320 edges, then reported 4481 affected symbols for `FastAPI`.
 
+Context Compiler v2.1 adds the next step: `sbe context <symbol>` returns ranked symbols, dependency paths, callers, code ranges, deterministic summaries, token budgets, and context reduction metrics without calling an AI model.
+
 ## The Basic Idea
 
 Instead of sending the full repository, ask the codebase for graph context:

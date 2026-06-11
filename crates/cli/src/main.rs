@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use sbe_context::ContextPack;
 use sbe_impact::ImpactReport;
 use sbe_indexer::{IndexReport, Indexer};
 use sbe_query::{BenchmarkReport, QueryEngine};
@@ -47,6 +48,16 @@ enum Commands {
     /// Show transitive dependents affected by changing a symbol.
     Impact {
         name: String,
+        #[arg(long)]
+        json: bool,
+        #[arg(default_value = ".")]
+        path: PathBuf,
+    },
+    /// Compile a minimal AI-ready context pack for a symbol.
+    Context {
+        name: String,
+        #[arg(long)]
+        budget: Option<usize>,
         #[arg(long)]
         json: bool,
         #[arg(default_value = ".")]
@@ -210,6 +221,28 @@ fn main() -> anyhow::Result<()> {
                 print_impact_summary(&reports);
             }
         }
+        Commands::Context {
+            name,
+            budget,
+            json,
+            path,
+        } => {
+            let packs = query_engine(path)?.context(&name, budget);
+            if json {
+                println!("{}", serde_json::to_string_pretty(&packs)?);
+            } else if packs.is_empty() {
+                println!("no symbols found for {name}");
+            } else {
+                for (idx, pack) in packs.iter().enumerate() {
+                    if idx > 0 {
+                        println!();
+                        println!("---");
+                        println!();
+                    }
+                    print_context_pack(pack);
+                }
+            }
+        }
         Commands::Update { path, json } => {
             let mut indexer = Indexer::new(path)?;
             let report = indexer.update()?;
@@ -370,6 +403,47 @@ fn main() -> anyhow::Result<()> {
     }
 
     Ok(())
+}
+
+fn print_context_pack(pack: &ContextPack) {
+    let symbol_name = |id| {
+        pack.symbols
+            .iter()
+            .find(|symbol| symbol.id == id)
+            .map(|symbol| symbol.name.as_str())
+            .unwrap_or("<unknown>")
+    };
+
+    println!("Root Symbol: {}", symbol_name(pack.root_symbol));
+    println!();
+    println!("Dependencies:");
+    let mut dependency_names: Vec<&str> = pack
+        .dependencies
+        .iter()
+        .filter_map(|path| path.nodes.get(1).copied())
+        .map(symbol_name)
+        .collect();
+    dependency_names.sort_unstable();
+    dependency_names.dedup();
+    if dependency_names.is_empty() {
+        println!("* none");
+    } else {
+        for name in dependency_names {
+            println!("* {name}");
+        }
+    }
+    println!();
+    println!("Callers:");
+    if pack.callers.is_empty() {
+        println!("* none");
+    } else {
+        for caller in &pack.callers {
+            println!("* {}", symbol_name(*caller));
+        }
+    }
+    println!();
+    println!("Context Reduction:");
+    println!("{:.1}%", pack.metrics.context_reduction_percent);
 }
 
 fn print_impact_summary(reports: &[ImpactReport]) {
