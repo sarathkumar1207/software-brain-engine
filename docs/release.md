@@ -6,6 +6,7 @@ SBE releases should look like a normal developer-tool release.
 
 Publish only user-facing artifacts:
 
+- npm: `sbe-cli`, which installs the `sbe` command and downloads native release assets.
 - Windows: one clickable `.msi` installer.
 - Linux: one compressed archive containing the `sbe` binary.
 - macOS: one compressed archive containing the `sbe` binary.
@@ -18,6 +19,7 @@ Download page:
 | --- | --- |
 | Windows x64 | `sbe-0.2.0-windows-x64.msi` |
 | Linux x64 | `sbe-linux-x64.tar.gz` |
+| macOS x64 | `sbe-macos-x64.tar.gz` |
 | macOS ARM64 | `sbe-macos-arm64.tar.gz` |
 
 Native assets for the npm wrapper:
@@ -56,6 +58,17 @@ SBE uses a PR-based semantic version flow.
 5. A maintainer reviews and merges the release PR.
 6. The `Tag Release` workflow creates tag `vX.Y.Z`.
 7. The `Release` workflow builds the MSI and native archives from the tag.
+8. After the GitHub Release contains all `sbe-core-*` assets and `checksums.txt`, the `Publish npm` workflow publishes `sbe-cli@X.Y.Z`.
+
+Do not publish npm before the matching GitHub Release assets exist. The npm wrapper downloads from:
+
+```text
+https://github.com/sarathkumar1207/software-brain-engine/releases/download/vX.Y.Z/
+```
+
+If the matching release assets are missing, `npm install -g sbe-cli` can install the wrapper but the first `sbe` run will fail with a 404.
+
+For manual Release workflow runs, enter the version as `0.2.0`. The workflow also normalizes `v0.2.0`, but the final GitHub Release tag must be exactly `v0.2.0`, not `vv0.2.0`.
 
 The version bump script updates crate versions, installer docs, release fallback metadata, and README version badges:
 

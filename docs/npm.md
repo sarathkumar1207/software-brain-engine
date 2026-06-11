@@ -97,8 +97,24 @@ sbe analyze-change "jwt to passport"
 ## Publish Checklist
 
 1. Merge the npm package changes.
-2. Create a version release so `sbe-core-*` assets and `checksums.txt` exist.
-3. Configure npm publishing in GitHub Actions using one of these supported modes:
+2. Create the matching GitHub Release first, for example `v0.2.0`.
+3. Confirm the release contains every npm download asset:
+
+```text
+sbe-core-linux-x64
+sbe-core-macos-x64
+sbe-core-macos-arm64
+sbe-core-windows-x64.exe
+checksums.txt
+```
+
+4. Only then publish the matching npm version, for example `sbe-cli@0.2.0`.
+
+The npm package version and GitHub Release tag must match. `sbe-cli@0.2.0` downloads from `releases/download/v0.2.0/`.
+
+Be careful with manual releases: the tag must be `v0.2.0`, not `vv0.2.0`. A double `v` release can show assets on GitHub but still break npm downloads.
+
+5. Configure npm publishing in GitHub Actions using one of these supported modes:
 
 ```text
 Recommended: npm Trusted Publishing
@@ -118,19 +134,19 @@ Alternative: npm Automation token
 
 Normal npm publish tokens can fail in CI with `EOTP` when the account has 2FA enabled. GitHub Actions cannot enter an interactive authenticator code, so use Trusted Publishing or an Automation token.
 
-4. From `npm/sbe`, validate locally:
+6. From `npm/sbe`, validate locally:
 
 ```bash
 npm pack --dry-run
 ```
 
-5. The GitHub workflow publishes with:
+7. The GitHub workflow publishes with:
 
 ```bash
 npm publish --access public --provenance
 ```
 
-6. Verify after publish:
+8. Verify after publish:
 
 ```bash
 npx sbe-cli version
