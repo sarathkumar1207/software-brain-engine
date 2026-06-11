@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const path = require('node:path');
 const test = require('node:test');
 const { cacheRoot, detectPlatform } = require('../lib/platform');
-const { parseChecksum } = require('../lib/download');
+const { isTrustedDownloadUrl, parseChecksum } = require('../lib/download');
 const { runBinary, translateArgs } = require('../lib/runner');
 
 test('detects supported platforms', () => {
@@ -23,6 +23,14 @@ test('builds cache root under home directory', () => {
 test('parses checksums', () => {
   const checksums = 'abc123  sbe-core-linux-x64\nffff  other';
   assert.equal(parseChecksum('sbe-core-linux-x64', checksums), 'abc123');
+});
+
+test('allows GitHub release asset redirect host', () => {
+  assert.equal(isTrustedDownloadUrl('https://github.com/owner/repo/releases/download/v1.0.0/tool.exe'), true);
+  assert.equal(isTrustedDownloadUrl('https://objects.githubusercontent.com/github-production-release-asset/file'), true);
+  assert.equal(isTrustedDownloadUrl('https://release-assets.githubusercontent.com/github-production-release-asset/file'), true);
+  assert.equal(isTrustedDownloadUrl('https://example.com/tool.exe'), false);
+  assert.equal(isTrustedDownloadUrl('http://github.com/owner/repo/releases/download/v1.0.0/tool.exe'), false);
 });
 
 test('translates explain to Rust analyze-change command', () => {
