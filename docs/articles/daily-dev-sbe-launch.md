@@ -31,6 +31,7 @@ Instead of sending the full repository, ask the codebase for graph context:
 
 ```bash
 sbe scan ./repo
+sbe update ./repo
 sbe graph createUser --json
 sbe impact createUser --json
 ```
@@ -172,6 +173,7 @@ The project is organized as a Cargo workspace:
 
 ```text
 scanner -> parser -> storage -> graph -> impact -> query -> cli
+                         \-> update -> graph diff
 ```
 
 ## Feedback Wanted

@@ -8,6 +8,7 @@ rust-version.workspace = true
 [dependencies]
 anyhow.workspace = true
 sbe-common.workspace = true
+sbe-graph.workspace = true
 sbe-parser.workspace = true
 sbe-scanner.workspace = true
 sbe-storage.workspace = true

@@ -85,6 +85,7 @@ pub struct QueryEngine {
 impl QueryEngine {
     pub fn from_snapshot(snapshot: IndexSnapshot) -> Self {
         let root = PathBuf::from(&snapshot.root);
+        let graph = SemanticGraph::from_snapshot(&snapshot);
         let files = snapshot
             .files
             .into_iter()
@@ -92,7 +93,6 @@ impl QueryEngine {
             .collect();
         let symbols = snapshot.symbols;
         let registry = SymbolRegistry::build(symbols.clone());
-        let graph = SemanticGraph::build(&snapshot.edges);
 
         Self {
             registry,

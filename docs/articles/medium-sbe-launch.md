@@ -57,6 +57,7 @@ Basic commands:
 
 ```bash
 sbe scan ./repo
+sbe update ./repo
 sbe graph createUser --json
 sbe impact createUser --json
 sbe benchmark ./repo --query "jwt to passport"
@@ -73,6 +74,8 @@ SBE returns:
 - code layers
 - approximate token savings
 - JSON output for AI agents and tools
+
+On a real Fastify checkout, Graph Intelligence v2 indexed 33 TypeScript declaration/type-test files into 506 symbols and 2700 edges. The `FastifyInstance` impact query reported 230 affected symbols across 24 files at depth 4, and the focused benchmark query reduced estimated context from ~84633 tokens to ~42335 tokens.
 
 The goal is not to replace the developer.
 
@@ -328,10 +331,11 @@ scanner  - repository traversal
 parser   - Tree-sitter TypeScript extraction
 storage  - .sbe binary index
 symbols  - symbol registry
-graph    - dependency graph
-impact   - reverse traversal
+graph    - typed dependency graph with forward/reverse indexes
+impact   - reverse BFS traversal
+update   - incremental graph refresh
 query    - context and benchmark reports
-indexer  - scan/parse/store pipeline
+indexer  - scan/parse/update/store pipeline
 cli      - user-facing commands
 ```
 
@@ -409,7 +413,7 @@ Near-term roadmap:
 - exact tokenizer support
 - watch mode
 - better TypeScript resolver
-- semantic diff
+- graph diff and symbol versioning
 - public benchmark corpus
 - editor and agent integrations
 - more language support

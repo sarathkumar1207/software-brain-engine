@@ -34,6 +34,7 @@ AI coding tools are powerful, but they often waste context by reading too much c
 - store a local binary index under `.sbe/`
 - ask a change question such as `jwt to passport`
 - get impacted symbols, files, layers, dependencies, and token estimates
+- update changed files incrementally without rebuilding the whole graph
 - send the focused context to an LLM instead of the full codebase
 
 SBE is useful when the change is specific enough to map to code layers: auth migrations, API changes, DTO updates, controller/service refactors, middleware rewrites, database model changes, and similar engineering work.
@@ -63,6 +64,18 @@ impacted      : 24 files, 49 symbols
 tokens        : full ~9469, sbe ~5319, saved ~4150 (44%)
 query time    : 3 ms
 ```
+
+Graph Intelligence v2 was also validated against a real Fastify checkout:
+
+```text
+indexed       : 33 files, 506 symbols
+graph         : 207 imports, 2700 edges
+impact        : 230 affected symbols, 24 affected files, depth 4
+tokens        : full ~84633, sbe ~42335, saved ~42298 (50%)
+query time    : 184 ms
+```
+
+See [docs/benchmark-fastify.md](docs/benchmark-fastify.md).
 
 This is not a promise that every query saves tokens. Small projects or broad changes may show no savings. That honesty is the point: SBE gives benchmark evidence, not marketing-only claims.
 
@@ -113,6 +126,11 @@ Current scope:
 - syntax-based TypeScript/TSX parsing through Tree-sitter
 - binary `.sbe/index.bin` storage
 - debug JSON export
+- Graph Intelligence v2 typed symbol and relationship graph
+- bidirectional caller/callee lookup
+- incremental index updates with `sbe update`
+- symbol version diffing for added, modified, and removed symbols
+- context preparation packets for future integrations
 - impact analysis and layer classification
 - benchmark and validation reports
 - Windows MSI release workflow
@@ -191,6 +209,12 @@ Index a project:
 sbe scan C:\path\to\typescript-project
 ```
 
+Incrementally refresh changed files after a scan:
+
+```powershell
+sbe update C:\path\to\typescript-project
+```
+
 Check index health:
 
 ```powershell
@@ -239,6 +263,7 @@ sbe export-json C:\path\to\typescript-project
 | --- | --- |
 | `sbe init <path>` | Create `.sbe/` metadata. |
 | `sbe scan <path>` | Build or refresh the local index. |
+| `sbe update <path>` | Incrementally update changed files in the existing index. |
 | `sbe inspect <symbol> <path>` | Return context packets for a symbol. |
 | `sbe graph <symbol> <path>` | Show dependencies and dependents. |
 | `sbe impact <symbol> <path>` | Show transitive impact. |
@@ -305,10 +330,10 @@ SBE is a Rust workspace:
 - `storage`: binary `.sbe/` persistence
 - `parser`: Tree-sitter TypeScript extraction
 - `symbols`: in-memory symbol indexes
-- `graph`: directed dependency graph
-- `impact`: reverse dependency analysis
+- `graph`: typed dependency graph with forward/reverse indexes, diffs, impact traversal, and context packs
+- `impact`: reverse dependency analysis reports
 - `query`: context, benchmark, and change-analysis reports
-- `indexer`: end-to-end indexing pipeline
+- `indexer`: full scan and incremental update pipeline
 - `cli`: user-facing command line
 
 See [docs/architecture.md](docs/architecture.md).

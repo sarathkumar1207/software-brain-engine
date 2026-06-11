@@ -8,6 +8,8 @@ For the current campaign sequence, use [`docs/launch-campaign.md`](launch-campai
 
 Software Brain Engine is a local Rust CLI that helps AI coding tools avoid reading unnecessary code. It indexes TypeScript/TSX repositories, finds impacted symbols/files/layers for a planned change, and reports approximate token savings.
 
+Graph Intelligence v2 benchmark proof point: on a shallow Fastify checkout, SBE indexed 33 TypeScript declaration/type-test files into 506 symbols and 2700 edges. `sbe impact FastifyInstance` reported 230 affected symbols across 24 files at depth 4, and the focused benchmark query reduced estimated context from ~84633 tokens to ~42335 tokens, a 50% reduction.
+
 Short version:
 
 ```text
