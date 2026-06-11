@@ -6,7 +6,7 @@
     <title>Software Brain Engine</title>
     <meta
       name="description"
-      content="Software Brain Engine turns TypeScript repositories into semantic graphs so AI systems can retrieve relevant code instead of loading entire repositories."
+      content="Software Brain Engine turns TypeScript, TSX, and Python repositories into semantic graphs so AI systems can retrieve relevant code instead of loading entire repositories."
     />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Software Brain Engine" />
@@ -52,7 +52,7 @@
             LLM coding tools waste tokens when they load broad folders before understanding the change.
           </p>
           <p class="hero-solution">
-            SBE turns repositories into semantic graphs for precise AI context retrieval.
+            SBE turns TypeScript, TSX, and Python repositories into semantic graphs for precise AI context retrieval.
           </p>
           <div class="hero-command" aria-label="Command line example">
             <span>$</span>
@@ -122,7 +122,7 @@ context:
         </div>
         <div class="feature-list">
           <div><strong>Builds a typed semantic graph</strong><span>Files, symbols, imports, references, containment edges, and reverse indexes.</span></div>
-          <div><strong>Extracts code structure</strong><span>Functions, classes, methods, interfaces, enums, variables, and type aliases.</span></div>
+          <div><strong>Extracts code structure</strong><span>Functions, classes, methods, Python async functions, interfaces, enums, variables, and type aliases.</span></div>
           <div><strong>Maps exact ranges</strong><span>Symbols point back to concrete source lines for retrieval.</span></div>
           <div><strong>Computes impact</strong><span>Reverse graph traversal shows what changes when a symbol changes.</span></div>
           <div><strong>Updates incrementally</strong><span>Changed files refresh the impacted graph portions without a full rebuild.</span></div>
@@ -231,9 +231,9 @@ Depth: 4</code></pre>
       <section class="section case-study" id="fastify-benchmark">
         <div class="section-heading">
           <p class="label">Graph Intelligence v2 Benchmark</p>
-          <h2>Validated on a real Fastify checkout.</h2>
+          <h2>Validated on real framework checkouts.</h2>
           <p>
-            SBE scanned Fastify's TypeScript declaration and type-test surface, then queried the central <code>FastifyInstance</code> type to measure reverse dependency impact and focused context reduction.
+            SBE scanned Fastify's TypeScript declaration surface and FastAPI's Python source tree, then queried central framework symbols to measure reverse dependency impact and focused context reduction.
           </p>
         </div>
         <div class="analytics-table" role="table" aria-label="Fastify benchmark results">
@@ -243,7 +243,7 @@ Depth: 4</code></pre>
             <span>Command</span>
           </div>
           <div role="row">
-            <span>Graph size</span>
+            <span>Fastify graph</span>
             <span>506 symbols, 207 imports, 2700 edges</span>
             <span><code>sbe scan</code></span>
           </div>
@@ -253,14 +253,39 @@ Depth: 4</code></pre>
             <span><code>sbe impact FastifyInstance</code></span>
           </div>
           <div role="row">
-            <span>Context estimate</span>
+            <span>FastAPI graph</span>
+            <span>6524 symbols, 3582 imports, 67320 edges</span>
+            <span><code>sbe scan</code></span>
+          </div>
+          <div role="row">
+            <span>FastAPI impact</span>
+            <span>4481 symbols, 706 files, depth 6</span>
+            <span><code>sbe impact FastAPI</code></span>
+          </div>
+          <div role="row">
+            <span>Fastify context</span>
             <span>~84633 full tokens to ~42335 focused tokens</span>
             <span><code>sbe benchmark</code></span>
           </div>
           <div role="row">
-            <span>Reduction</span>
+            <span>FastAPI context</span>
+            <span>~978145 full tokens to ~696741 focused tokens</span>
+            <span><code>sbe benchmark</code></span>
+          </div>
+          <div role="row">
+            <span>FastAPI update</span>
+            <span>1 changed file, 3 modified symbols, 10815 ms</span>
+            <span><code>sbe update</code></span>
+          </div>
+          <div role="row">
+            <span>Fastify reduction</span>
             <span>~42298 tokens saved, 50%</span>
             <span>184 ms query</span>
+          </div>
+          <div role="row">
+            <span>FastAPI reduction</span>
+            <span>~281404 tokens saved, 29%</span>
+            <span>10108 ms query</span>
           </div>
         </div>
       </section>
@@ -353,7 +378,7 @@ src/hono-base.test.ts:300-370</code></pre>
           <span>AI</span>
         </div>
         <p class="architecture-note">
-          Graph Intelligence v2 adds typed symbol nodes, forward and reverse dependency indexes, incremental updates, graph diffs, impact traversal, and context packs. SBE still uses practical syntax-based TypeScript analysis through Tree-sitter; it is not a TypeScript type checker or language server.
+          Graph Intelligence v2 adds typed symbol nodes, forward and reverse dependency indexes, incremental updates, graph diffs, impact traversal, and context packs. SBE uses Tree-sitter for TypeScript/TSX and a built-in Python plugin for Python source; it is not a type checker, language server, or Python runtime analyzer.
         </p>
       </section>
 
@@ -390,6 +415,7 @@ src/hono-base.test.ts:300-370</code></pre>
         <ol>
           <li><strong>v1</strong><span>Graph + impact analysis for TypeScript/TSX repositories.</span></li>
           <li><strong>v2</strong><span>Bidirectional dependency graph, incremental updates, symbol diffs, impact summaries, and context packs.</span></li>
+          <li><strong>v2.1</strong><span>Python language plugin for classes, functions, imports, references, and FastAPI-scale benchmarks.</span></li>
           <li><strong>v3</strong><span>AI context compiler with richer retrieval packets.</span></li>
         </ol>
       </section>

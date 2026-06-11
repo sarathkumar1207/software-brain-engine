@@ -17,10 +17,10 @@
 [![Version](https://img.shields.io/badge/version-0.2.2-blue.svg)](crates/cli/Cargo.toml)
 [![Rust Stable](https://img.shields.io/badge/rust-stable-orange.svg)](rust-toolchain.toml)
 [![Platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](docs/install.md)
-[![Language Scope](https://img.shields.io/badge/scope-TypeScript%20%7C%20TSX-3178c6.svg)](docs/architecture.md)
+[![Language Scope](https://img.shields.io/badge/scope-TypeScript%20%7C%20TSX%20%7C%20Python-3178c6.svg)](docs/architecture.md)
 [![Status](https://img.shields.io/badge/status-production--alpha-yellow.svg)](docs/governance.md)
 
-Software Brain Engine (`sbe`) is a local code-intelligence CLI for TypeScript and TSX projects. It builds a semantic index of your repository, then returns focused impact reports for planned code changes so LLMs do not need to read the whole codebase.
+Software Brain Engine (`sbe`) is a local code-intelligence CLI for TypeScript, TSX, and Python projects. It builds a semantic index of your repository, then returns focused impact reports for planned code changes so LLMs do not need to read the whole codebase.
 
 The goal is simple: install once, run `sbe`, and give developers or AI agents the smallest useful context for a change.
 
@@ -77,6 +77,18 @@ query time    : 184 ms
 
 See [docs/benchmark-fastify.md](docs/benchmark-fastify.md).
 
+Python plugin validation on a real FastAPI checkout:
+
+```text
+indexed       : 1120 Python files, 6524 symbols
+graph         : 3582 imports, 67320 edges
+impact        : FastAPI -> 4481 affected symbols, 706 affected files, depth 6
+tokens        : full ~978145, sbe ~696741, saved ~281404 (29%)
+update        : 1 changed file, 3 modified symbols, 10815 ms
+```
+
+See [docs/benchmark-fastapi.md](docs/benchmark-fastapi.md).
+
 This is not a promise that every query saves tokens. Small projects or broad changes may show no savings. That honesty is the point: SBE gives benchmark evidence, not marketing-only claims.
 
 ## Who Should Use It
@@ -119,11 +131,12 @@ See [docs/demo-hono.md](docs/demo-hono.md).
 
 ## Status
 
-SBE is a production-alpha CLI. It is usable for local TypeScript/TSX validation and benchmarking, but it is not yet a full type-aware TypeScript compiler integration.
+SBE is a production-alpha CLI. It is usable for local TypeScript/TSX/Python validation and benchmarking, but it is not yet a full type-aware TypeScript compiler integration or Python static analyzer.
 
 Current scope:
 
 - syntax-based TypeScript/TSX parsing through Tree-sitter
+- Python language plugin for classes, functions, async functions, methods, imports, variables, and local references
 - binary `.sbe/index.bin` storage
 - debug JSON export
 - Graph Intelligence v2 typed symbol and relationship graph
@@ -139,6 +152,7 @@ Current scope:
 Not yet:
 
 - full TypeScript type resolution
+- full Python type resolution, decorator evaluation, or runtime import execution
 - watch mode
 - exact model-tokenizer counting
 - editor extension
@@ -203,7 +217,7 @@ Build folders such as `target/`, `dist/`, and `artifacts/` are generated locally
 
 ## Quick Start
 
-Index a project:
+Index a TypeScript, TSX, or Python project:
 
 ```powershell
 sbe scan C:\path\to\typescript-project
@@ -312,7 +326,7 @@ SBE does not claim magic compression. It reduces context by selecting the code s
 
 Benchmark flow:
 
-1. Count approximate tokens for all indexed TypeScript/TSX source.
+1. Count approximate tokens for all indexed TypeScript/TSX/Python source.
 2. Match the query to symbols and files.
 3. Traverse dependencies and dependents.
 4. Merge overlapping symbol ranges so nested symbols are not double-counted.
@@ -328,7 +342,7 @@ SBE is a Rust workspace:
 - `common`: shared public data types
 - `scanner`: repository traversal and file hashing
 - `storage`: binary `.sbe/` persistence
-- `parser`: Tree-sitter TypeScript extraction
+- `parser`: TypeScript extraction plus Python language plugin
 - `symbols`: in-memory symbol indexes
 - `graph`: typed dependency graph with forward/reverse indexes, diffs, impact traversal, and context packs
 - `impact`: reverse dependency analysis reports

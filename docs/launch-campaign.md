@@ -48,6 +48,12 @@ Fastify Graph Intelligence v2 benchmark:
 Indexed: 33 TypeScript declaration/type-test files, 506 symbols, 2700 edges
 Impact: FastifyInstance -> 230 affected symbols, 24 files, depth 4
 Tokens: full ~84633, focused ~42335, saved ~42298 (50%)
+
+FastAPI Python plugin benchmark:
+Indexed: 1120 Python files, 6524 symbols, 67320 edges
+Impact: FastAPI -> 4481 affected symbols, 706 files, depth 6
+Tokens: full ~978145, focused ~696741, saved ~281404 (29%)
+Update: 1 changed file, 3 modified symbols, 10815 ms
 ```
 
 Use the proof carefully:
@@ -55,6 +61,7 @@ Use the proof carefully:
 ```text
 This is a realistic simulated demo, not an upstream Hono bug claim.
 The Fastify benchmark measures SBE's current TypeScript surface, not Fastify's JavaScript runtime files.
+The FastAPI benchmark measures SBE's Python syntax plugin, not runtime imports, decorators, or type checking.
 ```
 
 ## 7-Day Plan
@@ -90,7 +97,7 @@ Show HN: SBE, a Rust CLI that builds semantic graphs for AI code context
 Post:
 
 ```text
-I built Software Brain Engine, an open-source Rust CLI for TypeScript/TSX repositories.
+I built Software Brain Engine, an open-source Rust CLI for TypeScript/TSX/Python repositories.
 
 The problem: AI coding tools often read too much code before they understand a focused change. They search broad folders, open unrelated files, and burn context reconstructing dependencies.
 
@@ -119,7 +126,7 @@ First comment:
 ```text
 Limitations:
 
-- TypeScript/TSX only for now
+- TypeScript/TSX/Python source support
 - syntax-based, not type-aware yet
 - token estimates are approximate
 - small projects can show 0% savings because metadata overhead can be larger than the focused context
@@ -155,7 +162,7 @@ They search broad folders, open unrelated files, and reconstruct dependencies ma
 
 I built SBE to attack that problem.
 
-2/ Software Brain Engine is an open-source Rust CLI that turns TypeScript repos into semantic graphs.
+2/ Software Brain Engine is an open-source Rust CLI that turns TypeScript and Python repos into semantic graphs.
 
 Run:
   sbe scan ./repo
@@ -184,7 +191,7 @@ With SBE:
 5-7 files, ~5k-7k tokens
 
 5/ Current limits:
-- TypeScript/TSX only
+- TypeScript/TSX/Python source support
 - syntax-based analysis
 - approximate token estimate
 - production-alpha
@@ -211,7 +218,7 @@ Feedback wanted: Rust CLI that builds semantic graphs for AI code context
 Post:
 
 ```text
-I am building Software Brain Engine, an open-source Rust CLI for TypeScript/TSX repositories.
+I am building Software Brain Engine, an open-source Rust CLI for TypeScript/TSX/Python repositories.
 
 The problem I am trying to solve:
 AI coding tools often read too much code before understanding a focused change. They load broad folders and unrelated files, then manually infer dependencies.
@@ -237,7 +244,7 @@ The rough result:
 - SBE workflow: 5-7 files, ~5k-7k tokens
 
 Current limitations:
-- TypeScript/TSX only
+- TypeScript/TSX/Python source support
 - syntax-based, not type-aware yet
 - token estimate is approximate
 
@@ -261,7 +268,7 @@ I am building Software Brain Engine, an open-source Rust CLI for AI-assisted sof
 
 The problem: AI coding tools often read too much code before understanding the actual change.
 
-SBE scans a TypeScript repository locally and builds a semantic graph. Instead of sending broad folders to an LLM, you can ask:
+SBE scans a TypeScript or Python repository locally and builds a semantic graph. Instead of sending broad folders to an LLM, you can ask:
 
   sbe scan ./repo
   sbe update ./repo
@@ -275,7 +282,7 @@ give AI systems the code that matters, not the entire repository.
 
 Current alpha:
 - Rust CLI
-- TypeScript/TSX first
+- TypeScript/TSX/Python source support
 - local .sbe index
 - impact analysis
 - graph queries
@@ -335,7 +342,7 @@ No. Current token estimates are approximate. The benchmark is meant to compare f
 ### "Can I use this with Java/Python/Go?"
 
 ```text
-Not yet. V1 focuses on TypeScript/TSX. The workspace is modular so more parsers can be added later.
+SBE now supports TypeScript, TSX, and Python. More parser plugins can be added through the same modular parser boundary.
 ```
 
 ## Success Metrics

@@ -4,6 +4,8 @@ This package installs the `sbe` command for Software Brain Engine.
 
 It is a Node.js wrapper around the native Rust engine. The wrapper downloads the correct prebuilt binary from GitHub Releases on install or first run, caches it under `~/.sbe/bin/<version>/`, and forwards commands to the Rust executable.
 
+SBE indexes TypeScript, TSX, and Python projects. Python support is provided by the built-in Python language plugin.
+
 ## Install
 
 ```bash
