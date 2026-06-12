@@ -6,8 +6,9 @@ Software Brain Engine is a modular Rust workspace. Each crate has one responsibi
 
 ```text
 scanner -> parser -> storage
-                 \-> symbols -> graph -> impact -> query -> cli
-                               \-> context -/
+                 \-> symbols -> graph -> impact -----> query -> cli
+                               \-> context ----/
+                               \-> simulator --/
                          ^
                          |
                       update
@@ -59,6 +60,19 @@ The `sbe-context` crate turns graph data into deterministic, budgeted context pa
 - `builder.rs`: typed pack builder.
 
 The compiler does not call AI models, generate embeddings, implement MCP, or perform vector search. It prepares minimal context for future integrations.
+
+## Change Simulator v2.2
+
+The `sbe-simulator` crate predicts the graph impact of modifying, deleting, or replacing a symbol before source code changes:
+
+- iterative bounded traversal expands forward dependencies and reverse dependents;
+- cycle protection ensures each direction visits a symbol at most once;
+- configurable risk scoring combines callers, dependencies, cross-file edges, depth, flow participation, and operation severity;
+- flow detection identifies connected named workflows and exported graph entry points;
+- test selection recommends connected symbols from test/spec files or test-named symbols;
+- Context Compiler builds the focused code pack attached to every report.
+
+Simulation reads the existing index and does not mutate source or graph data. Optional CLI recording writes only the resulting JSON report.
 
 ## Incremental Updates
 

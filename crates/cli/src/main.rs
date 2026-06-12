@@ -1,8 +1,9 @@
-use clap::{Parser, Subcommand};
+use clap::{Args, Parser, Subcommand};
 use sbe_context::ContextPack;
 use sbe_impact::ImpactReport;
 use sbe_indexer::{IndexReport, Indexer};
 use sbe_query::{BenchmarkReport, QueryEngine};
+use sbe_simulator::{RiskLevel, SimulationOperation, SimulationReport};
 use sbe_storage::Store;
 use serde::Serialize;
 use std::collections::HashSet;
@@ -22,7 +23,7 @@ enum Commands {
         #[arg(default_value = ".")]
         path: PathBuf,
     },
-    /// Scan and index a TypeScript/TSX repository.
+    /// Scan and index a TypeScript, TSX, or Python repository.
     Scan {
         #[arg(default_value = ".")]
         path: PathBuf,
@@ -62,6 +63,11 @@ enum Commands {
         json: bool,
         #[arg(default_value = ".")]
         path: PathBuf,
+    },
+    /// Predict graph impact, risk, affected flows, and tests before editing code.
+    Simulate {
+        #[command(subcommand)]
+        operation: SimulationCommands,
     },
     /// Incrementally update the existing index from changed files.
     Update {
@@ -115,6 +121,30 @@ enum Commands {
         #[arg(long)]
         json: bool,
     },
+}
+
+#[derive(Debug, Subcommand)]
+enum SimulationCommands {
+    /// Predict the impact of modifying a symbol in place.
+    Modify(SimulationArgs),
+    /// Predict the impact of deleting a symbol.
+    Delete(SimulationArgs),
+    /// Predict the impact of replacing a symbol or implementation.
+    Replace(SimulationArgs),
+}
+
+#[derive(Debug, Args)]
+struct SimulationArgs {
+    name: String,
+    #[arg(long, default_value_t = 6)]
+    max_depth: usize,
+    #[arg(long)]
+    json: bool,
+    /// Persist the JSON report under .sbe/reports for later comparison.
+    #[arg(long)]
+    record: bool,
+    #[arg(default_value = ".")]
+    path: PathBuf,
 }
 
 #[derive(Debug, Serialize)]
@@ -240,6 +270,59 @@ fn main() -> anyhow::Result<()> {
                         println!();
                     }
                     print_context_pack(pack);
+                }
+            }
+        }
+        Commands::Simulate { operation } => {
+            let (operation, args) = match operation {
+                SimulationCommands::Modify(args) => (SimulationOperation::Modify, args),
+                SimulationCommands::Delete(args) => (SimulationOperation::Delete, args),
+                SimulationCommands::Replace(args) => (SimulationOperation::Replace, args),
+            };
+            let path = args.path;
+            let engine = query_engine(path.clone())?;
+            let reports = engine.simulate(&args.name, operation, args.max_depth);
+            let recorded_path = if args.record && !reports.is_empty() {
+                let store = Store::open_existing(&path)?;
+                let operation_name = match operation {
+                    SimulationOperation::Modify => "modify",
+                    SimulationOperation::Delete => "delete",
+                    SimulationOperation::Replace => "replace",
+                };
+                let symbol_name: String = args
+                    .name
+                    .chars()
+                    .map(|character| {
+                        if character.is_ascii_alphanumeric() || character == '-' {
+                            character
+                        } else {
+                            '_'
+                        }
+                    })
+                    .collect();
+                Some(store.write_report_json(
+                    &format!("simulation-{operation_name}-{symbol_name}-latest.json"),
+                    &reports,
+                )?)
+            } else {
+                None
+            };
+            if args.json {
+                println!("{}", serde_json::to_string_pretty(&reports)?);
+            } else if reports.is_empty() {
+                println!("no symbols found for {}", args.name);
+            } else {
+                for (index, report) in reports.iter().enumerate() {
+                    if index > 0 {
+                        println!();
+                        println!("---");
+                        println!();
+                    }
+                    print_simulation_report(&engine, report);
+                }
+                if let Some(path) = recorded_path {
+                    println!();
+                    println!("Recorded: {}", path.display());
                 }
             }
         }
@@ -444,6 +527,58 @@ fn print_context_pack(pack: &ContextPack) {
     println!();
     println!("Context Reduction:");
     println!("{:.1}%", pack.metrics.context_reduction_percent);
+}
+
+fn print_simulation_report(engine: &QueryEngine, report: &SimulationReport) {
+    let name = |id| engine.symbol_name(id).unwrap_or("<unknown>");
+    println!(
+        "Simulation: {:?} {}",
+        report.operation,
+        name(report.target_symbol)
+    );
+    println!(
+        "Risk: {} ({:.1}/100)",
+        risk_label(report.risk_level),
+        report.risk_score
+    );
+    println!();
+    println!("Affected Symbols: {}", report.affected_symbols.len());
+    println!("Affected Files: {}", report.affected_files.len());
+    println!("Depth: {}", report.traversal_depth);
+    println!();
+    println!("Affected Flows:");
+    if report.affected_flows.is_empty() {
+        println!("* none detected");
+    } else {
+        for id in &report.affected_flows {
+            println!("* {}", name(*id));
+        }
+    }
+    println!();
+    println!("Recommended Tests:");
+    if report.recommended_tests.is_empty() {
+        println!("* none detected");
+    } else {
+        for id in &report.recommended_tests {
+            println!("* {}", name(*id));
+        }
+    }
+    println!();
+    println!(
+        "Context: {} symbols, {} files, ~{} tokens",
+        report.context_pack.metrics.symbols_selected,
+        report.context_pack.metrics.files_selected,
+        report.context_pack.metrics.estimated_tokens
+    );
+}
+
+fn risk_label(level: RiskLevel) -> &'static str {
+    match level {
+        RiskLevel::Low => "LOW",
+        RiskLevel::Medium => "MEDIUM",
+        RiskLevel::High => "HIGH",
+        RiskLevel::Critical => "CRITICAL",
+    }
 }
 
 fn print_impact_summary(reports: &[ImpactReport]) {

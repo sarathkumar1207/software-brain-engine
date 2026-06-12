@@ -17,6 +17,7 @@ sbe-context.workspace = true
 sbe-impact.workspace = true
 sbe-indexer.workspace = true
 sbe-query.workspace = true
+sbe-simulator.workspace = true
 sbe-storage.workspace = true
 serde.workspace = true
 serde_json.workspace = true

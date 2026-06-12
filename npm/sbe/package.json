@@ -1,7 +1,7 @@
 {
   "name": "sbe-cli",
   "version": "0.3.0",
-  "description": "Software Brain Engine CLI wrapper for the native Rust graph engine.",
+  "description": "Native Rust semantic graph CLI for code impact, change simulation, and focused context retrieval.",
   "license": "MIT",
   "homepage": "https://sarathkumar1207.github.io/software-brain-engine/",
   "repository": {
@@ -36,7 +36,13 @@
     "cli",
     "rust",
     "typescript",
+    "python",
     "semantic-graph",
+    "dependency-graph",
+    "change-impact",
+    "impact-analysis",
+    "change-simulation",
+    "context-retrieval",
     "code-intelligence",
     "llm",
     "ai-tools",

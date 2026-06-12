@@ -6,6 +6,16 @@ For a real framework benchmark, see [benchmark-fastify.md](benchmark-fastify.md)
 
 For a Python framework benchmark, see [benchmark-fastapi.md](benchmark-fastapi.md). The FastAPI run indexed 1120 Python files, built 6524 symbols and 67320 edges, reported 4481 affected symbols for `FastAPI`, and reduced a broad routing/dependency query estimate by 29%.
 
+## Change Simulator v2.2 Microbenchmark
+
+The simulator benchmark builds a deterministic 10,000-symbol, 200-file graph with sequential and cross-module edges. It runs 50 bounded modify simulations at depth 6, including forward/reverse traversal, risk scoring, flow/test detection, and context compilation.
+
+On the development machine used on June 12, 2026, the optimized benchmark averaged approximately `125 microseconds` per simulation. This is a synthetic engine benchmark, not a promise for every repository or machine. Run it locally with:
+
+```bash
+cargo bench -p sbe-simulator --bench change_simulator
+```
+
 Context Compiler v2.1 can be benchmarked separately with:
 
 ```bash
