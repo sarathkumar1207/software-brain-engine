@@ -14,6 +14,7 @@ jobs:
   publish:
     name: Publish sbe-cli
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -26,7 +27,9 @@ jobs:
         id: package
         working-directory: npm/sbe
         shell: bash
-        run: echo "version=$(node -p \"require('./package.json').version\")" >> "$GITHUB_OUTPUT"
+        run: |
+          VERSION=$(node -p 'require("./package.json").version')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Verify package version matches release tag
         if: github.event_name == 'release'
@@ -34,9 +37,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          package_version="$(node -p "require('./package.json').version")"
+
+          package_version=$(node -p 'require("./package.json").version')
           release_version="${{ github.event.release.tag_name }}"
           release_version="${release_version#v}"
+
           if [[ "$package_version" != "$release_version" ]]; then
             echo "package.json version $package_version does not match release $release_version"
             exit 1
@@ -50,7 +55,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+
           version="${{ steps.package.outputs.version }}"
+
           if npm view "sbe-cli@$version" version --json >/dev/null 2>&1; then
             echo "::error::sbe-cli@$version is already published. Bump the package version before publishing; npm versions are immutable."
             exit 1
@@ -62,14 +69,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+
           version="${{ steps.package.outputs.version }}"
+
           assets="$(gh api "repos/${{ github.repository }}/releases/tags/v$version" --jq '.assets[].name')"
+
           for required in \
             sbe-core-linux-x64 \
             sbe-core-macos-x64 \
             sbe-core-macos-arm64 \
             sbe-core-windows-x64.exe \
             checksums.txt; do
+
             if ! grep -Fxq "$required" <<< "$assets"; then
               echo "::error::GitHub release v$version is missing required asset: $required"
               exit 1
@@ -82,11 +93,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+
           if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
             echo "NPM_TOKEN secret is not set. The workflow will try npm Trusted Publishing through GitHub OIDC."
             echo "If Trusted Publishing is not configured in npm, add an npm Automation token as the NPM_TOKEN repository secret."
             exit 0
           fi
+
           npm whoami --registry=https://registry.npmjs.org
 
       - name: Publish package
@@ -96,10 +109,14 @@ jobs:
         shell: bash
         run: |
           set +e
+
           output="$(npm publish --access public --provenance 2>&1)"
           status=$?
+
           echo "$output"
+
           if [[ "$status" -ne 0 ]] && grep -q "EOTP" <<< "$output"; then
             echo "::error::npm requires a one-time password. GitHub Actions cannot provide interactive OTP. Replace NPM_TOKEN with an npm Automation token, or configure npm Trusted Publishing for this GitHub repository and workflow."
           fi
+
           exit "$status"
