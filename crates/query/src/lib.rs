@@ -2,6 +2,9 @@ use sbe_common::{ContextPacket, FileEntry, IndexSnapshot, Symbol};
 use sbe_context::{Budget, ContextCompilation, ContextCompiler, ContextPack};
 use sbe_graph::SemanticGraph;
 use sbe_impact::{ImpactAnalyzer, ImpactReport};
+use sbe_simulator::{
+    ChangeSimulation, ChangeSimulator, SimulationOperation, SimulationReport, SimulationRequest,
+};
 use sbe_symbols::SymbolRegistry;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -141,6 +144,34 @@ impl QueryEngine {
             .into_iter()
             .filter_map(|symbol| compiler.compile(symbol.id, budget))
             .collect()
+    }
+
+    pub fn simulate(
+        &self,
+        name: &str,
+        operation: SimulationOperation,
+        max_depth: usize,
+    ) -> Vec<SimulationReport> {
+        let simulator = ChangeSimulator::new(&self.graph, &self.registry, &self.files);
+        self.registry
+            .find_by_name(name)
+            .into_iter()
+            .filter_map(|symbol| {
+                simulator
+                    .simulate(SimulationRequest {
+                        operation,
+                        target_symbol: symbol.id,
+                        max_depth,
+                    })
+                    .ok()
+            })
+            .collect()
+    }
+
+    pub fn symbol_name(&self, symbol_id: u64) -> Option<&str> {
+        self.registry
+            .get(symbol_id)
+            .map(|symbol| symbol.name.as_str())
     }
 
     pub fn analyze_change(&self, query: &str) -> ChangeAnalysisReport {
@@ -590,5 +621,36 @@ mod tests {
             .iter()
             .any(|symbol| symbol.name == "saveUser"));
         assert!(packs[0].summary.contains("Calls saveUser"));
+    }
+
+    #[test]
+    fn simulates_change_by_symbol_name() {
+        let snapshot = IndexSnapshot {
+            storage_version: 1,
+            root: ".".into(),
+            files: vec![FileEntry {
+                id: 1,
+                path: "src/users.ts".into(),
+                relative_path: "src/users.ts".into(),
+                hash: "hash".into(),
+                extension: "ts".into(),
+            }],
+            symbols: vec![symbol(10, "createUser", 1), symbol(11, "saveUser", 1)],
+            imports: vec![],
+            edges: vec![sbe_common::Edge {
+                from: 10,
+                to: 11,
+                relation: sbe_common::RelationType::References,
+                range: None,
+            }],
+        };
+        let engine = QueryEngine::from_snapshot(snapshot);
+
+        let reports = engine.simulate("createUser", SimulationOperation::Delete, 4);
+
+        assert_eq!(reports.len(), 1);
+        assert_eq!(reports[0].target_symbol, 10);
+        assert_eq!(reports[0].affected_symbols, vec![10, 11]);
+        assert_eq!(engine.symbol_name(11), Some("saveUser"));
     }
 }

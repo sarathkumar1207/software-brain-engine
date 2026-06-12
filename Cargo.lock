@@ -505,6 +505,7 @@ dependencies = [
  "sbe-impact",
  "sbe-indexer",
  "sbe-query",
+ "sbe-simulator",
  "sbe-storage",
  "serde",
  "serde_json",
@@ -583,6 +584,7 @@ dependencies = [
  "sbe-context",
  "sbe-graph",
  "sbe-impact",
+ "sbe-simulator",
  "sbe-symbols",
  "serde",
  "tempfile",
@@ -597,6 +599,18 @@ dependencies = [
  "sbe-common",
  "tempfile",
  "walkdir",
+]
+
+[[package]]
+name = "sbe-simulator"
+version = "0.3.0"
+dependencies = [
+ "rustc-hash",
+ "sbe-common",
+ "sbe-context",
+ "sbe-graph",
+ "sbe-symbols",
+ "serde",
 ]
 
 [[package]]
