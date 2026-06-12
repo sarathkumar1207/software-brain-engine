@@ -22,6 +22,12 @@ jobs:
           node-version: 20
           registry-url: https://registry.npmjs.org
 
+      - name: Read package version
+        id: package
+        working-directory: npm/sbe
+        shell: bash
+        run: echo "version=$(node -p \"require('./package.json').version\")" >> "$GITHUB_OUTPUT"
+
       - name: Verify package version matches release tag
         if: github.event_name == 'release'
         working-directory: npm/sbe
@@ -39,6 +45,36 @@ jobs:
       - name: Test npm wrapper
         working-directory: npm/sbe
         run: node --test
+
+      - name: Reject an already published version
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${{ steps.package.outputs.version }}"
+          if npm view "sbe-cli@$version" version --json >/dev/null 2>&1; then
+            echo "::error::sbe-cli@$version is already published. Bump the package version before publishing; npm versions are immutable."
+            exit 1
+          fi
+
+      - name: Verify matching native release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${{ steps.package.outputs.version }}"
+          assets="$(gh api "repos/${{ github.repository }}/releases/tags/v$version" --jq '.assets[].name')"
+          for required in \
+            sbe-core-linux-x64 \
+            sbe-core-macos-x64 \
+            sbe-core-macos-arm64 \
+            sbe-core-windows-x64.exe \
+            checksums.txt; do
+            if ! grep -Fxq "$required" <<< "$assets"; then
+              echo "::error::GitHub release v$version is missing required asset: $required"
+              exit 1
+            fi
+          done
 
       - name: Check npm authentication
         env:
