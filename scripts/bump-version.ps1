@@ -65,6 +65,10 @@ Update-File ".github/workflows/release.yml" {
 $VersionedFiles = @(
     "README.md",
     "docs/install.md",
+    "docs/npm.md",
+    "docs/release.md",
+    "docs/articles/daily-dev-sbe-launch.md",
+    "docs/articles/medium-sbe-launch.md",
     "website/index.html"
 )
 
@@ -78,6 +82,8 @@ foreach ($File in $VersionedFiles) {
             -replace 'git push origin v\d+\.\d+\.\d+', "git push origin v$Version" `
             -replace 'build-msi\.ps1 -Version \d+\.\d+\.\d+', "build-msi.ps1 -Version $Version" `
             -replace '`v\d+\.\d+\.\d+`', "``v$Version``" `
+            -replace '`sbe-cli@\d+\.\d+\.\d+`', "``sbe-cli@$Version``" `
+            -replace 'releases/download/v\d+\.\d+\.\d+/', "releases/download/v$Version/" `
             -replace '`sbe-\d+\.\d+\.\d+-windows-x64\.msi`', "``sbe-$Version-windows-x64.msi``"
     }
 }

@@ -14,7 +14,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![npm version](https://img.shields.io/npm/v/sbe-cli.svg)](https://www.npmjs.com/package/sbe-cli)
 [![npm downloads](https://img.shields.io/npm/dm/sbe-cli.svg)](https://www.npmjs.com/package/sbe-cli)
-[![Version](https://img.shields.io/badge/version-0.2.2-blue.svg)](crates/cli/Cargo.toml)
+[![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](crates/cli/Cargo.toml)
 [![Rust Stable](https://img.shields.io/badge/rust-stable-orange.svg)](rust-toolchain.toml)
 [![Platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](docs/install.md)
 [![Language Scope](https://img.shields.io/badge/scope-TypeScript%20%7C%20TSX%20%7C%20Python-3178c6.svg)](docs/architecture.md)
@@ -167,7 +167,7 @@ Download the release artifact for your platform:
 Windows:
 
 ```text
-sbe-0.2.2-windows-x64.msi
+sbe-0.3.0-windows-x64.msi
 ```
 
 Linux/macOS:
@@ -181,7 +181,7 @@ Download locations:
 
 | Platform | Artifact | Location |
 | --- | --- | --- |
-| Windows x64 | `sbe-0.2.2-windows-x64.msi` | [GitHub Releases](https://github.com/sarathkumar1207/software-brain-engine/releases/latest) |
+| Windows x64 | `sbe-0.3.0-windows-x64.msi` | [GitHub Releases](https://github.com/sarathkumar1207/software-brain-engine/releases/latest) |
 | Linux x64 | `sbe-linux-x64.tar.gz` | [GitHub Releases](https://github.com/sarathkumar1207/software-brain-engine/releases/latest) |
 | macOS ARM64 | `sbe-macos-arm64.tar.gz` | [GitHub Releases](https://github.com/sarathkumar1207/software-brain-engine/releases/latest) |
 
@@ -377,8 +377,8 @@ build installer artifacts
 Push a version tag:
 
 ```powershell
-git tag v0.2.2
-git push origin v0.2.2
+git tag v0.3.0
+git push origin v0.3.0
 ```
 
 Then GitHub publishes release downloads.

@@ -496,7 +496,7 @@ dependencies = [
 
 [[package]]
 name = "sbe-cli"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -513,14 +513,14 @@ dependencies = [
 
 [[package]]
 name = "sbe-common"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "sbe-context"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "rustc-hash",
  "sbe-common",
@@ -532,7 +532,7 @@ dependencies = [
 
 [[package]]
 name = "sbe-graph"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "petgraph",
  "sbe-common",
@@ -540,7 +540,7 @@ dependencies = [
 
 [[package]]
 name = "sbe-impact"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "sbe-common",
  "sbe-graph",
@@ -550,7 +550,7 @@ dependencies = [
 
 [[package]]
 name = "sbe-indexer"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "rayon",
@@ -566,7 +566,7 @@ dependencies = [
 
 [[package]]
 name = "sbe-parser"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "blake3",
@@ -577,7 +577,7 @@ dependencies = [
 
 [[package]]
 name = "sbe-query"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "sbe-common",
  "sbe-context",
@@ -590,7 +590,7 @@ dependencies = [
 
 [[package]]
 name = "sbe-scanner"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "blake3",
@@ -601,7 +601,7 @@ dependencies = [
 
 [[package]]
 name = "sbe-storage"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "bincode",
@@ -613,7 +613,7 @@ dependencies = [
 
 [[package]]
 name = "sbe-symbols"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "sbe-common",
 ]
