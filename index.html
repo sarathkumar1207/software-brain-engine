@@ -127,6 +127,7 @@ context:
           <div><strong>Computes impact</strong><span>Reverse graph traversal shows what changes when a symbol changes.</span></div>
           <div><strong>Updates incrementally</strong><span>Changed files refresh the impacted graph portions without a full rebuild.</span></div>
           <div><strong>Compiles context packs</strong><span>Ranked symbols, dependency paths, callers, code ranges, metrics, and token budgets.</span></div>
+          <div><strong>Simulates changes</strong><span>Predict modify, delete, or replace blast radius, risk, affected flows, and relevant tests before editing.</span></div>
           <div><strong>Compresses AI context</strong><span>Send focused graph context instead of the whole repository.</span></div>
         </div>
       </section>
@@ -190,6 +191,22 @@ Callers:
 
 Context Reduction:
 99.2%</code></pre>
+          </article>
+          <article>
+            <h3>Simulate</h3>
+            <pre><code>$ sbe simulate delete createUser
+
+Risk: HIGH (68.5/100)
+
+Affected Symbols: 32
+Affected Files: 11
+
+Affected Flows:
+* Signup
+* Login
+
+Recommended Tests:
+* test_create_user</code></pre>
           </article>
         </div>
       </section>
@@ -390,12 +407,14 @@ src/hono-base.test.ts:300-370</code></pre>
           <i></i>
           <span>Semantic Graph</span>
           <i></i>
+          <span>Change Simulator</span>
+          <i></i>
           <span>Context Compiler</span>
           <i></i>
           <span>AI</span>
         </div>
         <p class="architecture-note">
-          Graph Intelligence v2 adds typed symbol nodes, forward and reverse dependency indexes, incremental updates, graph diffs, impact traversal, and context packs. Context Compiler v2.1 ranks graph symbols, applies token budgets, extracts dependency paths, and emits minimal code ranges without calling an AI model. SBE uses Tree-sitter for TypeScript/TSX and a built-in Python plugin for Python source; it is not a type checker, language server, or Python runtime analyzer.
+          Graph Intelligence v2 adds typed symbol nodes, forward and reverse dependency indexes, incremental updates, graph diffs, impact traversal, and context packs. Context Compiler v2.1 ranks graph symbols, applies token budgets, extracts dependency paths, and emits minimal code ranges. Change Simulator v2.2 predicts modify, delete, and replace impact with deterministic risk, flow, and test analysis. SBE uses Tree-sitter for TypeScript/TSX and a built-in Python plugin; it does not call AI and is not a compiler-grade type checker or runtime analyzer.
         </p>
       </section>
 
@@ -434,6 +453,7 @@ src/hono-base.test.ts:300-370</code></pre>
           <li><strong>v2</strong><span>Bidirectional dependency graph, incremental updates, symbol diffs, impact summaries, and context packs.</span></li>
           <li><strong>v2.1</strong><span>Python language plugin for classes, functions, imports, references, and FastAPI-scale benchmarks.</span></li>
           <li><strong>v2.1</strong><span>Context Compiler with ranking, token budgets, dependency paths, deterministic summaries, and reduction metrics.</span></li>
+          <li><strong>v2.2</strong><span>Change Simulator with modify/delete/replace predictions, risk scoring, flow detection, test selection, and recorded reports.</span></li>
           <li><strong>v3</strong><span>AI context compiler with richer retrieval packets.</span></li>
         </ol>
       </section>
