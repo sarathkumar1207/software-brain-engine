@@ -7,13 +7,21 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: tag-release-main
+  cancel-in-progress: false
 
 jobs:
   tag-release:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
 

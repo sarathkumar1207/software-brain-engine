@@ -2,6 +2,18 @@
 
 Software Brain Engine is a modular Rust CLI. Contributions are welcome, but changes must stay reviewable because the project touches parsing, storage, release artifacts, and AI-context benchmark claims.
 
+By participating, you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md). Usage questions
+belong in [GitHub Discussions](https://github.com/sarathkumar1207/software-brain-engine/discussions),
+and vulnerabilities must be reported privately according to [SECURITY.md](SECURITY.md).
+
+## Before You Start
+
+- Search existing issues and pull requests before creating new work.
+- Open an issue before large features, storage changes, or breaking CLI changes.
+- Keep pull requests focused and avoid unrelated refactors.
+- Do not include generated `.sbe/`, `target/`, packaged binaries, secrets, or proprietary fixtures.
+- Use test fixtures that are minimal and safe to publish.
+
 ## Contribution Model
 
 All code changes should go through pull requests.
@@ -62,10 +74,12 @@ Do not publish `target/`, `.sbe/`, WiX intermediate files, or loose build folder
 Run these before opening a pull request:
 
 ```powershell
-cargo fmt --check
-cargo check --workspace
-cargo test --workspace
-cargo clippy --workspace -- -D warnings
+cargo fmt --all --check
+cargo check --workspace --all-targets --all-features --locked
+cargo test --workspace --all-targets --all-features --locked
+cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+cargo doc --workspace --all-features --no-deps --locked
+npm --prefix npm/sbe test
 ```
 
 For release-sensitive changes, also run:
@@ -116,5 +130,13 @@ A PR can be merged when:
 - docs are updated when user-facing behavior changes
 - storage version impact is understood
 - benchmark claims remain honest
+- commits contain no secrets or generated local indexes
+- public APIs and JSON output remain compatible or document the break
 
 Large changes should be split by subsystem where possible.
+
+## Review And Ownership
+
+Maintainers may request changes for correctness, security, compatibility, test coverage, or scope.
+Review is not guaranteed on a specific timeline. The governance and decision process is documented
+in [GOVERNANCE.md](GOVERNANCE.md).
