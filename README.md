@@ -8,7 +8,8 @@
   Local semantic graph infrastructure for precise AI code context retrieval.
 </p>
 
-[![Rust](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/rust.yml/badge.svg)](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/rust.yml)
+[![CI](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/ci.yml)
+[![Security audit](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/security.yml/badge.svg)](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/security.yml)
 [![Release](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/release.yml/badge.svg)](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/release.yml)
 [![Website](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/pages.yml/badge.svg)](https://github.com/sarathkumar1207/software-brain-engine/actions/workflows/pages.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -411,6 +412,14 @@ cargo build --release -p sbe-cli
 ```
 
 Contributions should use pull requests and Conventional Commits. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+Community and project policies:
+
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Security Policy](SECURITY.md)
+- [Support](SUPPORT.md)
+- [Governance](GOVERNANCE.md)
+- [Changelog and Releases](CHANGELOG.md)
 
 ## Roadmap
 

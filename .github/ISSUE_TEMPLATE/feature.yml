@@ -1,0 +1,54 @@
+name: Feature request
+description: Propose a focused improvement to SBE.
+title: "feat: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What developer or AI-agent workflow is currently difficult?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the expected command, output, or API behavior.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Explain existing workarounds or competing designs.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Primary area
+      options:
+        - CLI and user experience
+        - Parser or language support
+        - Indexing and graph accuracy
+        - Storage format
+        - Context generation and token estimates
+        - Packaging and releases
+        - Documentation
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope checks
+      options:
+        - label: This request describes one focused capability.
+          required: true
+        - label: I searched existing issues and discussions for similar proposals.
+          required: true

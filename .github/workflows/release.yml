@@ -1,20 +1,16 @@
 name: Release
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "Release version without v prefix, for example 0.3.0"
-        required: true
-        type: string
   push:
-    branches:
-      - main
     tags:
-      - "v*"
+      - "v[0-9]*.[0-9]*.[0-9]*"
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -50,27 +46,46 @@ jobs:
             binary_path: target/aarch64-apple-darwin/release/sbe
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8 # stable
+        with:
+          toolchain: stable
+
+      - name: Verify release version
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag_version="${GITHUB_REF_NAME#v}"
+          cargo_version="$(sed -n 's/^version = "\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)"/\1/p' crates/cli/Cargo.toml | head -n 1)"
+          npm_version="$(node -p 'require("./npm/sbe/package.json").version')"
+
+          if [[ "$cargo_version" != "$tag_version" || "$npm_version" != "$tag_version" ]]; then
+            echo "Release tag, CLI version, and npm version must match."
+            echo "tag=$tag_version cargo=$cargo_version npm=$npm_version"
+            exit 1
+          fi
+
       - name: Add Rust target
         if: matrix.rust_target != ''
         run: rustup target add ${{ matrix.rust_target }}
 
       - name: Build release binary
         if: runner.os != 'Windows'
-        run: cargo build --release -p sbe-cli --target ${{ matrix.rust_target }}
+        run: cargo build --release -p sbe-cli --target ${{ matrix.rust_target }} --locked
 
       - name: Build release binary
         if: runner.os == 'Windows'
-        run: cargo build --release -p sbe-cli
+        run: cargo build --release -p sbe-cli --locked
 
       - name: Package Windows MSI
         if: runner.os == 'Windows'
         shell: powershell
         run: |
           choco install wixtoolset --no-progress -y
-          $version = "${{ inputs.version || github.ref_name }}".TrimStart("v")
-          if ($version -notmatch '^\d+\.\d+\.\d+$') { $version = "0.3.0" }
+          $version = "${{ github.ref_name }}".TrimStart("v")
           .\scripts\build-msi.ps1 -Version "$version" -OutputDir artifacts
           Copy-Item "${{ matrix.binary_path }}" artifacts\${{ matrix.core_asset }}
 
@@ -84,7 +99,8 @@ jobs:
           chmod +x artifacts/${{ matrix.core_asset }}
           tar -czf artifacts/${{ matrix.artifact }}.tar.gz -C artifacts sbe
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload platform artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ matrix.artifact }}
           path: |
@@ -94,33 +110,25 @@ jobs:
 
   publish:
     name: Publish GitHub Release
-    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
     steps:
-      - uses: actions/download-artifact@v4
+      - name: Download platform artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           path: release-artifacts
           merge-multiple: true
-      - name: Resolve release tag
-        id: release
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            version="${{ inputs.version }}"
-            version="${version#v}"
-            echo "tag=v${version}" >> "$GITHUB_OUTPUT"
-          else
-            echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
-          fi
       - name: Generate checksums
         shell: bash
         run: |
           cd release-artifacts
           sha256sum sbe-core-* > checksums.txt
-      - uses: softprops/action-gh-release@v2
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
-          tag_name: ${{ steps.release.outputs.tag }}
           files: release-artifacts/*
           generate_release_notes: true
+          fail_on_unmatched_files: true

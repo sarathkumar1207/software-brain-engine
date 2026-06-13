@@ -14,13 +14,27 @@ Enable branch protection for `main` in GitHub:
 6. Enable `Require review from Code Owners`.
 7. Enable `Require status checks to pass before merging`.
 8. Select these checks:
-   - Rust
-   - Release build checks when available
+   - `CI / Rust quality`
+   - `CI / Platform check (windows-latest)`
+   - `CI / Platform check (macos-latest)`
+   - `Security audit / RustSec advisory audit`
 9. Enable `Require branches to be up to date before merging`.
 10. Enable `Restrict who can push to matching branches`.
 11. Disable direct maintainer bypass unless there is an emergency.
+12. Require conversation resolution before merging.
+13. Block force pushes and branch deletion.
 
-GitHub branch protection is not fully enforceable from source files. The repository includes `CODEOWNERS`, PR templates, issue templates, and CI workflows, but the maintainer must enable branch protection in GitHub settings.
+GitHub branch protection is not fully enforceable from source files. The repository includes
+`CODEOWNERS`, PR templates, issue forms, and CI workflows, but the maintainer must enable branch
+protection in GitHub settings.
+
+Set the default `GITHUB_TOKEN` permission to read-only under **Settings > Actions > General** and
+allow workflows to request write permissions only where declared. Enable Dependabot alerts,
+security updates, private vulnerability reporting, and secret scanning where GitHub makes them
+available.
+
+Configure GitHub Pages to use **GitHub Actions** as its source. The Website workflow deploys through
+the protected `github-pages` environment and does not push generated content to a branch.
 
 ## Merge Policy
 
@@ -56,6 +70,11 @@ Version bumping is automated by the `Version PR` workflow:
 - Do not store user project data outside `.sbe/`.
 - Do not include `.sbe/` indexes in normal commits.
 - Do not publish generated build folders as release assets.
+- Pin third-party GitHub Actions to full commit SHAs.
+- Give each workflow and job only the permissions it requires.
+- Protect the `npm` and `github-pages` environments with deployment rules when appropriate.
+
+See the public [Security Policy](../SECURITY.md) for vulnerability reporting.
 
 ## Issue Discipline
 

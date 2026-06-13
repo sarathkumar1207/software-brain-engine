@@ -1,7 +1,6 @@
 name: Publish npm
 
 on:
-  workflow_dispatch:
   release:
     types:
       - published
@@ -10,15 +9,23 @@ permissions:
   contents: read
   id-token: write
 
+concurrency:
+  group: npm-publish-${{ github.event.release.tag_name || github.ref }}
+  cancel-in-progress: false
+
 jobs:
   publish:
     name: Publish sbe-cli
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: npm
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      - uses: actions/setup-node@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org
@@ -108,7 +115,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         shell: bash
         run: |
-          set +e
+          set -o pipefail
 
           output="$(npm publish --access public --provenance 2>&1)"
           status=$?
