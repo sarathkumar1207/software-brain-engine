@@ -26,6 +26,9 @@ sbe update .
 sbe graph createUser --json
 sbe impact saveUser
 sbe context createUser --budget 4000 --json
+sbe simulate modify createUser
+sbe simulate delete createUser --max-depth 6 --record
+sbe simulate replace createUser --json
 sbe explain "jwt to passport" --json
 ```
 
@@ -34,6 +37,10 @@ sbe explain "jwt to passport" --json
 `sbe update` incrementally refreshes changed files in an existing `.sbe` index. `sbe impact <symbol>` prints affected symbol count, affected file count, and traversal depth; use `--json` for the detailed report.
 
 `sbe context <symbol>` compiles a deterministic, budgeted context pack for future AI tools without calling an AI model.
+
+`sbe simulate <modify|delete|replace> <symbol>` predicts the blast radius before code is edited. It traverses dependencies and callers, scores risk, detects affected entry-point flows, recommends connected existing tests, and compiles a context pack. Add `--record` to save the JSON report under `.sbe/reports/`.
+
+SBE analysis is deterministic and graph-based. It does not call AI, execute project code, or claim compiler-grade TypeScript or Python type resolution.
 
 ## Supported Platforms
 

@@ -72,6 +72,8 @@ sbe update .
 sbe graph createUser --json
 sbe impact saveUser --json
 sbe context createUser --budget 4000 --json
+sbe simulate modify createUser
+sbe simulate delete createUser --max-depth 6 --record
 ```
 
 `sbe update` passes through to the Rust incremental update engine. It scans file hashes, reparses changed files, refreshes the stored graph, and reports added, modified, removed, and affected symbols.
@@ -86,6 +88,16 @@ Context Compiler v2.1 is available through the same npm wrapper because it is im
 sbe context createUser
 sbe context createUser --budget 8000 --json
 ```
+
+Change Simulator v2.2 is also implemented in the native binary. It predicts impact before an edit using only the stored dependency graph:
+
+```bash
+sbe simulate modify createUser
+sbe simulate delete createUser --record
+sbe simulate replace createUser --json
+```
+
+`--record` writes the machine-readable report to `.sbe/reports/simulation-<operation>-<symbol>-latest.json`.
 
 The npm wrapper adds one user-friendly alias:
 

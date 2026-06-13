@@ -8,6 +8,7 @@ members = [
   "crates/graph",
   "crates/impact",
   "crates/context",
+  "crates/simulator",
   "crates/query",
   "crates/indexer",
   "crates/cli",
@@ -45,5 +46,6 @@ sbe-symbols = { path = "crates/symbols" }
 sbe-graph = { path = "crates/graph" }
 sbe-impact = { path = "crates/impact" }
 sbe-context = { path = "crates/context" }
+sbe-simulator = { path = "crates/simulator" }
 sbe-query = { path = "crates/query" }
 sbe-indexer = { path = "crates/indexer" }

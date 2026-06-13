@@ -45,6 +45,57 @@ fn validate_auth_fixture_end_to_end() {
     );
 }
 
+#[test]
+fn simulate_records_machine_readable_report_end_to_end() {
+    let temp = tempfile::tempdir().unwrap();
+    let fixture = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/auth-ts");
+    copy_project(&fixture, temp.path());
+
+    let scan = Command::new(env!("CARGO_BIN_EXE_sbe"))
+        .arg("scan")
+        .arg(temp.path())
+        .output()
+        .unwrap();
+    assert!(
+        scan.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&scan.stderr)
+    );
+
+    let output = Command::new(env!("CARGO_BIN_EXE_sbe"))
+        .arg("simulate")
+        .arg("delete")
+        .arg("AuthService")
+        .arg("--max-depth")
+        .arg("4")
+        .arg("--record")
+        .arg("--json")
+        .arg(temp.path())
+        .output()
+        .unwrap();
+
+    assert!(
+        output.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let reports: Value = serde_json::from_slice(&output.stdout).unwrap();
+    let report = &reports[0];
+    assert_eq!(report["operation"], "delete");
+    assert!(report["risk_score"].as_f64().unwrap() > 0.0);
+    assert!(!report["affected_symbols"].as_array().unwrap().is_empty());
+    assert!(
+        report["context_pack"]["metrics"]["symbols_selected"]
+            .as_u64()
+            .unwrap()
+            > 0
+    );
+    assert!(temp
+        .path()
+        .join(".sbe/reports/simulation-delete-AuthService-latest.json")
+        .exists());
+}
+
 fn copy_project(source: &Path, destination: &Path) {
     for entry in std::fs::read_dir(source).unwrap() {
         let entry = entry.unwrap();

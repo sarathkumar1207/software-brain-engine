@@ -145,6 +145,8 @@ Current scope:
 - incremental index updates with `sbe update`
 - symbol version diffing for added, modified, and removed symbols
 - Context Compiler v2.1 for deterministic, budgeted context packs
+- Change Simulator v2.2 for modify, delete, and replace predictions
+- deterministic risk scoring, affected-flow detection, and recommended test selection
 - impact analysis and layer classification
 - benchmark and validation reports
 - Windows MSI release workflow
@@ -250,6 +252,16 @@ sbe context createUser C:\path\to\typescript-project --budget 4000
 sbe context createUser C:\path\to\typescript-project --budget 8000 --json
 ```
 
+Predict impact before changing code:
+
+```powershell
+sbe simulate modify createUser C:\path\to\project
+sbe simulate delete createUser C:\path\to\project --max-depth 6
+sbe simulate replace createUser C:\path\to\project --record --json
+```
+
+The simulator answers four practical questions before an edit: what symbols and files are affected, how risky the operation is, which entry-point flows participate, and which connected existing tests should run. `--record` stores the JSON result under `.sbe/reports/` for regression and release comparisons.
+
 Benchmark token optimization:
 
 ```powershell
@@ -291,6 +303,7 @@ sbe export-json C:\path\to\typescript-project
 | `sbe graph <symbol> <path>` | Show dependencies and dependents. |
 | `sbe impact <symbol> <path>` | Show transitive impact. |
 | `sbe context <symbol> <path>` | Compile a ranked, budgeted context pack. |
+| `sbe simulate <modify\|delete\|replace> <symbol> <path>` | Predict blast radius, risk, flows, tests, and context before editing. |
 | `sbe analyze-change <query> <path>` | Explain affected layers/files/symbols for a planned change. |
 | `sbe benchmark <path> --query <query>` | Compare full-project tokens vs focused SBE context. |
 | `sbe validate <path> --query <query>` | Scan, benchmark, and write `.sbe/reports/validation-latest.json`. |
@@ -357,11 +370,12 @@ SBE is a Rust workspace:
 - `graph`: typed dependency graph with forward/reverse indexes, diffs, impact traversal, and context packs
 - `impact`: reverse dependency analysis reports
 - `context`: deterministic context compiler, ranking, budget pruning, dependency paths, and code ranges
+- `simulator`: bounded graph traversal, risk scoring, flow detection, test selection, and context assembly
 - `query`: context, benchmark, and change-analysis reports
 - `indexer`: full scan and incremental update pipeline
 - `cli`: user-facing command line
 
-See [docs/architecture.md](docs/architecture.md) and [docs/context-compiler.md](docs/context-compiler.md).
+See [docs/architecture.md](docs/architecture.md), [docs/context-compiler.md](docs/context-compiler.md), and [docs/change-simulator.md](docs/change-simulator.md).
 Review hardening notes are tracked in [docs/review-issues.md](docs/review-issues.md).
 CodeRabbit setup and unresolved review findings are tracked in
 [docs/coderabbit.md](docs/coderabbit.md) and [docs/review-backlog.md](docs/review-backlog.md).
