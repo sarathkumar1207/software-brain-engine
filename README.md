@@ -376,6 +376,8 @@ SBE is a Rust workspace:
 
 See [docs/architecture.md](docs/architecture.md), [docs/context-compiler.md](docs/context-compiler.md), and [docs/change-simulator.md](docs/change-simulator.md).
 Review hardening notes are tracked in [docs/review-issues.md](docs/review-issues.md).
+CodeRabbit setup and unresolved review findings are tracked in
+[docs/coderabbit.md](docs/coderabbit.md) and [docs/review-backlog.md](docs/review-backlog.md).
 
 ## Release
 
