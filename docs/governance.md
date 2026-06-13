@@ -18,7 +18,7 @@ Enable branch protection for `main` in GitHub:
    - `Rust quality`
    - `Platform check (windows-latest)`
    - `Platform check (macos-latest)`
-   - `RustSec advisory audit`
+
    - `Analyze (actions)`
    - `Analyze (javascript-typescript)`
    - `Analyze (rust)`
