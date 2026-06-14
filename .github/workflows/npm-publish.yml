@@ -4,13 +4,19 @@ on:
   release:
     types:
       - published
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing GitHub Release tag to publish, for example v0.4.0
+        required: true
+        type: string
 
 permissions:
   contents: read
   id-token: write
 
 concurrency:
-  group: npm-publish-${{ github.event.release.tag_name || github.ref }}
+  group: npm-publish-${{ inputs.release_tag || github.event.release.tag_name }}
   cancel-in-progress: false
 
 jobs:
@@ -23,6 +29,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ inputs.release_tag || github.event.release.tag_name }}
 
       - name: Set up Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
@@ -39,14 +47,21 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Verify package version matches release tag
-        if: github.event_name == 'release'
         working-directory: npm/sbe
         shell: bash
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag || github.event.release.tag_name }}
         run: |
           set -euo pipefail
 
           package_version=$(node -p 'require("./package.json").version')
-          release_version="${{ github.event.release.tag_name }}"
+          release_version="$RELEASE_TAG"
+
+          if [[ ! "$release_version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "release tag must use the vX.Y.Z format: $release_version"
+            exit 1
+          fi
+
           release_version="${release_version#v}"
 
           if [[ "$package_version" != "$release_version" ]]; then
