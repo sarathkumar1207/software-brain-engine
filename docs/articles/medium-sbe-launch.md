@@ -446,7 +446,7 @@ Platform artifacts:
 
 | Platform | Artifact |
 | --- | --- |
-| Windows x64 | `sbe-0.3.0-windows-x64.msi` |
+| Windows x64 | `sbe-0.4.0-windows-x64.msi` |
 | Linux x64 | `sbe-linux-x64.tar.gz` |
 | macOS ARM64 | `sbe-macos-arm64.tar.gz` |
 
