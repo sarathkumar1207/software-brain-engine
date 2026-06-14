@@ -124,7 +124,7 @@ sbe analyze-change "jwt to passport"
 ## Publish Checklist
 
 1. Merge the npm package changes.
-2. Create the matching GitHub Release first, for example `v0.4.0`.
+2. Create the matching GitHub Release first, for example `v0.4.1`.
 3. Confirm the release contains every npm download asset:
 
 ```text
@@ -135,11 +135,11 @@ sbe-core-windows-x64.exe
 checksums.txt
 ```
 
-4. Only then publish the matching npm version, for example `sbe-cli@0.4.0`.
+4. Only then publish the matching npm version, for example `sbe-cli@0.4.1`.
 
-The npm package version and GitHub Release tag must match. `sbe-cli@0.4.0` downloads from `releases/download/v0.4.0/`.
+The npm package version and GitHub Release tag must match. `sbe-cli@0.4.1` downloads from `releases/download/v0.4.1/`.
 
-Be careful with manual releases: the tag must be `v0.4.0`, not `vv0.3.0`. A double `v` release can show assets on GitHub but still break npm downloads.
+Be careful with manual releases: the tag must be `v0.4.1`, not `vv0.3.0`. A double `v` release can show assets on GitHub but still break npm downloads.
 
 5. Configure npm publishing in GitHub Actions using one of these supported modes:
 
@@ -209,4 +209,4 @@ Use the version folder that failed in your error message.
 
 ### npm version already published
 
-npm versions are immutable. If `sbe-cli@0.4.0` has a wrapper bug, publish `sbe-cli@0.4.0`; do not try to republish `0.2.2`.
+npm versions are immutable. If `sbe-cli@0.4.1` has a wrapper bug, publish `sbe-cli@0.4.1`; do not try to republish `0.2.2`.
