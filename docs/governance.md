@@ -10,19 +10,23 @@ Enable branch protection for `main` in GitHub:
 2. Open `Branches`.
 3. Add a branch protection rule for `main`.
 4. Enable `Require a pull request before merging`.
-5. Enable `Require approvals` and set at least `1`.
-6. Enable `Require review from Code Owners`.
-7. Enable `Require status checks to pass before merging`.
-8. Select these checks:
-   - `CI / Rust quality`
-   - `CI / Platform check (windows-latest)`
-   - `CI / Platform check (macos-latest)`
-   - `Security audit / RustSec advisory audit`
-9. Enable `Require branches to be up to date before merging`.
-10. Enable `Restrict who can push to matching branches`.
-11. Disable direct maintainer bypass unless there is an emergency.
-12. Require conversation resolution before merging.
-13. Block force pushes and branch deletion.
+5. When two or more maintainers are active, enable `Require approvals`, set it to at least `1`,
+   and enable `Require review from Code Owners`. Do not enable these controls for a sole maintainer,
+   because the pull request author cannot approve their own change.
+6. Enable `Require status checks to pass before merging`.
+7. Select these checks:
+   - `Rust quality`
+   - `Platform check (windows-latest)`
+   - `Platform check (macos-latest)`
+
+   - `Analyze (actions)`
+   - `Analyze (javascript-typescript)`
+   - `Analyze (rust)`
+8. Enable `Require branches to be up to date before merging`.
+9. Enable `Do not allow bypassing the above settings`.
+10. Require conversation resolution before merging.
+11. Require linear history.
+12. Block force pushes and branch deletion.
 
 GitHub branch protection is not fully enforceable from source files. The repository includes
 `CODEOWNERS`, PR templates, issue forms, and CI workflows, but the maintainer must enable branch
