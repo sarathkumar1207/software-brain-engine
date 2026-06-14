@@ -3,466 +3,165 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Software Brain Engine</title>
-    <meta
-      name="description"
-      content="Software Brain Engine turns TypeScript, TSX, and Python repositories into semantic graphs so AI systems can retrieve relevant code instead of loading entire repositories."
-    />
+    <title>SBE | Know what your code change will break</title>
+    <meta name="description" content="Software Brain Engine maps code dependencies, predicts change impact, and compiles focused context for developers and AI coding agents." />
+    <meta name="theme-color" content="#07110e" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Software Brain Engine" />
-    <meta
-      property="og:description"
-      content="Stop sending entire codebases to AI. SBE turns repositories into semantic graphs for precise code context retrieval."
-    />
+    <meta property="og:title" content="Know what your code change will break" />
+    <meta property="og:description" content="A local semantic graph for impact analysis, change simulation, and focused AI context." />
     <meta property="og:url" content="https://sarathkumar1207.github.io/software-brain-engine/" />
-    <meta property="og:image" content="https://sarathkumar1207.github.io/software-brain-engine/logo.svg" />
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="Software Brain Engine" />
-    <meta
-      name="twitter:description"
-      content="A local semantic graph engine for precise AI code context retrieval."
-    />
-    <meta name="twitter:image" content="https://sarathkumar1207.github.io/software-brain-engine/logo.svg" />
+    <meta property="og:image" content="https://sarathkumar1207.github.io/software-brain-engine/social-card.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="logo.svg" type="image/svg+xml" />
+    <link rel="preload" href="sbe-demo.mp4" as="video" type="video/mp4" />
     <link rel="stylesheet" href="styles.css" />
+    <script src="site.js" defer></script>
   </head>
   <body>
-    <header class="topbar">
-      <a class="brand" href="#top" aria-label="Software Brain Engine home">
-        <img class="brand-mark" src="logo.svg" alt="" />
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="SBE home">
+        <img src="logo.svg" alt="" />
         <span>Software Brain Engine</span>
+        <small>v0.4.1</small>
       </a>
       <nav aria-label="Primary navigation">
-        <a href="#before-after">Before / After</a>
+        <a href="#problem">Why SBE</a>
         <a href="#demo">Demo</a>
-        <a href="#download">Download</a>
-        <a href="#fastify-benchmark">Benchmark</a>
-        <a href="#case-study">Case Study</a>
-        <a href="#architecture">Architecture</a>
-        <a href="#roadmap">Roadmap</a>
+        <a href="#proof">Proof</a>
+        <a href="#install">Install</a>
       </nav>
+      <a class="header-github" href="https://github.com/sarathkumar1207/software-brain-engine">GitHub <span aria-hidden="true">↗</span></a>
     </header>
 
-    <main id="top">
-      <section class="hero">
+    <main id="main">
+      <section class="hero" id="top">
         <div class="hero-copy">
-          <p class="eyebrow">Open-source semantic graph engine for code context</p>
-          <h1>Stop sending entire codebases to AI.</h1>
-          <p class="hero-problem">
-            LLM coding tools waste tokens when they load broad folders before understanding the change.
-          </p>
-          <p class="hero-solution">
-            SBE turns TypeScript, TSX, and Python repositories into semantic graphs for precise AI context retrieval.
-          </p>
-          <div class="hero-command" aria-label="Command line example">
-            <span>$</span>
-            <code>npm install -g sbe-cli</code>
+          <p class="kicker"><span></span> Open source. Local first. No AI calls.</p>
+          <h1>Know what your code change will break.</h1>
+          <p class="hero-lead">SBE builds a semantic graph of your TypeScript, TSX, or Python codebase, then shows affected symbols, files, flows, tests, and the smallest useful context before you edit.</p>
+          <div class="install-command">
+            <span>$</span><code>npm install -g sbe-cli</code>
+            <button class="copy-button" data-copy="npm install -g sbe-cli" aria-label="Copy install command">Copy</button>
           </div>
           <div class="hero-actions">
-            <a class="button primary" href="https://github.com/sarathkumar1207/software-brain-engine">View on GitHub</a>
-            <a class="button secondary" href="https://www.npmjs.com/package/sbe-cli">npm package</a>
-            <a class="button secondary" href="https://github.com/sarathkumar1207/software-brain-engine/releases/latest">Native downloads</a>
-            <a class="button secondary" href="#demo">See CLI Demo</a>
+            <a class="button button-primary" href="#demo">Watch the 30-second demo</a>
+            <a class="button button-ghost" href="https://github.com/sarathkumar1207/software-brain-engine">Explore the source</a>
+          </div>
+          <div class="trust-row" aria-label="Project facts">
+            <span><strong>MIT</strong> licensed</span>
+            <span><strong>4</strong> native platforms</span>
+            <span><strong>0</strong> cloud dependencies</span>
           </div>
         </div>
-        <div class="hero-terminal" aria-label="SBE graph output preview">
-          <div class="terminal-header">
-            <span>sbe graph createUser</span>
-            <small>semantic graph query</small>
-          </div>
-          <pre><code>symbol: createUser
-kind: Function
-file: src/users/user.service.ts:18-42
-
-dependencies:
-  -> validateCreateUserDto
-  -> UserRepository.save
-  -> hashPassword
-
-dependents:
-  <- POST /users controller
-  <- createUserHandler
-
-context:
-  4 files, 7 symbols, exact source ranges</code></pre>
+        <div class="hero-visual" aria-label="Code dependency graph illustration">
+          <div class="graph-grid"></div>
+          <span class="node node-root">login</span>
+          <span class="node node-a">verifyJwt</span>
+          <span class="node node-b">AuthService</span>
+          <span class="node node-c">AuthController</span>
+          <span class="node node-d">authMiddleware</span>
+          <svg viewBox="0 0 620 520" aria-hidden="true">
+            <path d="M310 260 L178 138 M310 260 L445 137 M310 260 L472 358 M310 260 L148 371" />
+            <path class="pulse" d="M178 138 L445 137 M445 137 L472 358" />
+          </svg>
+          <div class="impact-card"><small>Predicted impact</small><strong>10 symbols · 4 files</strong><span>MEDIUM RISK · 36.5/100</span></div>
         </div>
       </section>
 
-      <section class="section before-after" id="before-after">
-        <div class="section-heading">
-          <p class="label">Before / After</p>
-          <h2>Give the model a code graph, not a scavenger hunt.</h2>
+      <section class="signal-strip" aria-label="Core outcomes">
+        <div><span>01</span><strong>Map dependencies</strong><p>See callers and callees without opening broad folders.</p></div>
+        <div><span>02</span><strong>Predict blast radius</strong><p>Find affected files, entry flows, and connected tests before editing.</p></div>
+        <div><span>03</span><strong>Compile context</strong><p>Give AI agents ranked code ranges under an explicit token budget.</p></div>
+      </section>
+
+      <section class="section problem" id="problem">
+        <div class="section-intro">
+          <p class="section-label">The real problem</p>
+          <h2>Code changes fail at the connections you did not see.</h2>
         </div>
-        <div class="comparison">
-          <article>
-            <h3>Before SBE</h3>
-            <ul>
-              <li>LLM reads 10-20 files to find the relevant path.</li>
-              <li>Guesses dependencies from imports and naming.</li>
-              <li>Burns tokens on unrelated controllers, services, and DTOs.</li>
-              <li>Misses downstream impact during refactors.</li>
-            </ul>
-          </article>
-          <article class="after">
-            <h3>After SBE</h3>
-            <ul>
-              <li>LLM queries the semantic graph first.</li>
-              <li>Gets exact functions, classes, dependencies, and dependents.</li>
-              <li>Receives file paths and source code ranges.</li>
-              <li>Uses focused context instead of broad repository dumps.</li>
-            </ul>
-          </article>
+        <div class="problem-grid">
+          <article><span>Before</span><h3>Search is not impact analysis.</h3><p>Text search finds names. It does not reliably explain which callers, flows, files, and tests depend on the symbol you plan to change.</p></article>
+          <article><span>Before</span><h3>AI context gets expensive fast.</h3><p>Coding agents inspect broad directories because they lack a reusable structural map. More context still does not guarantee the right context.</p></article>
+          <article class="solution-card"><span>With SBE</span><h3>Query the graph first.</h3><p>Scan locally once. Ask for impact or a simulated change. Pass the focused result to a developer, review process, or AI tool.</p></article>
         </div>
       </section>
 
-      <section class="section compact" id="what-it-does">
-        <div class="section-heading">
-          <p class="label">What It Does</p>
-          <h2>A local index for code structure and change impact.</h2>
+      <section class="section demo-section" id="demo">
+        <div class="section-intro demo-intro">
+          <div><p class="section-label">Real CLI demo</p><h2>From repository to change plan in seconds.</h2></div>
+          <p>Recorded from SBE 0.4.0 against the included authentication fixture. The output below is real, reproducible, and runs entirely on the local machine.</p>
         </div>
-        <div class="feature-list">
-          <div><strong>Builds a typed semantic graph</strong><span>Files, symbols, imports, references, containment edges, and reverse indexes.</span></div>
-          <div><strong>Extracts code structure</strong><span>Functions, classes, methods, Python async functions, interfaces, enums, variables, and type aliases.</span></div>
-          <div><strong>Maps exact ranges</strong><span>Symbols point back to concrete source lines for retrieval.</span></div>
-          <div><strong>Computes impact</strong><span>Reverse graph traversal shows what changes when a symbol changes.</span></div>
-          <div><strong>Updates incrementally</strong><span>Changed files refresh the impacted graph portions without a full rebuild.</span></div>
-          <div><strong>Compiles context packs</strong><span>Ranked symbols, dependency paths, callers, code ranges, metrics, and token budgets.</span></div>
-          <div><strong>Simulates changes</strong><span>Predict modify, delete, or replace blast radius, risk, affected flows, and relevant tests before editing.</span></div>
-          <div><strong>Compresses AI context</strong><span>Send focused graph context instead of the whole repository.</span></div>
+        <div class="video-shell">
+          <div class="video-topbar"><div><i></i><i></i><i></i></div><span>sbe-demo — PowerShell</span><small>REAL OUTPUT</small></div>
+          <video controls muted playsinline preload="metadata" aria-label="Terminal demo of SBE scanning and analyzing an authentication codebase">
+            <source src="sbe-demo.mp4" type="video/mp4" />
+            Your browser does not support embedded video.
+          </video>
         </div>
-      </section>
-
-      <section class="section demo" id="demo">
-        <div class="section-heading">
-          <p class="label">Demo</p>
-          <h2>Ask the repository what matters.</h2>
-        </div>
-        <div class="demo-grid">
-          <article>
-            <h3>Scan</h3>
-            <pre><code>$ sbe scan ./repo
-
-SBE scan complete
-  indexed files : 214
-  graph         : 918 symbols, 301 imports, 1440 edges
-  storage       : ./repo/.sbe
-  elapsed       : 682 ms</code></pre>
-          </article>
-          <article>
-            <h3>Update</h3>
-            <pre><code>$ sbe update ./repo
-
-SBE update complete
-  changed files : 3
-  symbols       : 2 added, 4 modified, 1 removed
-  affected      : 7 symbols
-  affected files: 3</code></pre>
-          </article>
-          <article>
-            <h3>Graph</h3>
-            <pre><code>$ sbe graph createUser --json
-
-{
-  "symbol": "createUser",
-  "dependencies": ["CreateUserDto", "hashPassword", "UserRepository.save"],
-  "dependents": ["UsersController.create", "createUserHandler"]
-}</code></pre>
-          </article>
-          <article>
-            <h3>Impact</h3>
-            <pre><code>$ sbe impact saveUser
-
-Affected Symbols: 24
-Affected Files: 8
-Depth: 4</code></pre>
-          </article>
-          <article>
-            <h3>Context</h3>
-            <pre><code>$ sbe context createUser --budget 4000
-
-Root Symbol: createUser
-
-Dependencies:
-* validateEmail
-* saveUser
-
-Callers:
-* AuthController
-
-Context Reduction:
-99.2%</code></pre>
-          </article>
-          <article>
-            <h3>Simulate</h3>
-            <pre><code>$ sbe simulate delete createUser
-
-Risk: HIGH (68.5/100)
-
-Affected Symbols: 32
-Affected Files: 11
-
-Affected Flows:
-* Signup
-* Login
-
-Recommended Tests:
-* test_create_user</code></pre>
-          </article>
+        <div class="demo-steps">
+          <div><code>sbe scan .</code><strong>Build the graph</strong><span>12 symbols, 14 edges in 51 ms</span></div>
+          <div><code>sbe impact login</code><strong>Trace dependents</strong><span>5 symbols across 3 files</span></div>
+          <div><code>sbe simulate modify login</code><strong>Plan the edit</strong><span>Risk, flows, tests, and context</span></div>
         </div>
       </section>
 
-      <section class="section download" id="download">
-        <div class="section-heading">
-          <p class="label">Download</p>
-          <h2>Install SBE like a normal CLI.</h2>
-          <p>Use npm for the easiest setup. The wrapper downloads the correct native Rust binary from GitHub Releases.</p>
+      <section class="section proof" id="proof">
+        <div class="section-intro">
+          <p class="section-label">Measured on real projects</p>
+          <h2>Evidence, with the limits stated clearly.</h2>
+          <p>SBE reports focused-context estimates from indexed source characters. Results depend on project shape and query scope; broad changes may save little or no context.</p>
         </div>
-        <div class="download-grid">
-          <article>
-            <h3>npm</h3>
-            <code>npm install -g sbe-cli</code>
-            <img class="npm-badge" src="https://img.shields.io/npm/dm/sbe-cli.svg" alt="npm monthly downloads for sbe-cli" />
-            <a href="https://www.npmjs.com/package/sbe-cli">View package</a>
-          </article>
-          <article>
-            <h3>Windows x64</h3>
-            <code>sbe-0.4.1-windows-x64.msi</code>
-            <a href="https://github.com/sarathkumar1207/software-brain-engine/releases/latest">Download MSI</a>
-          </article>
-          <article>
-            <h3>Linux x64</h3>
-            <code>sbe-linux-x64.tar.gz</code>
-            <a href="https://github.com/sarathkumar1207/software-brain-engine/releases/latest">Download archive</a>
-          </article>
-          <article>
-            <h3>macOS ARM64</h3>
-            <code>sbe-macos-arm64.tar.gz</code>
-            <a href="https://github.com/sarathkumar1207/software-brain-engine/releases/latest">Download archive</a>
-          </article>
-          <article>
-            <h3>macOS x64</h3>
-            <code>sbe-macos-x64.tar.gz</code>
-            <a href="https://github.com/sarathkumar1207/software-brain-engine/releases/latest">Download archive</a>
-          </article>
+        <div class="proof-grid">
+          <article><div class="project-name">Fastify <span>TypeScript</span></div><strong>50%</strong><p>estimated context reduction</p><dl><div><dt>Graph</dt><dd>506 symbols</dd></div><div><dt>Impact</dt><dd>230 symbols</dd></div><div><dt>Query</dt><dd>184 ms</dd></div></dl><a href="https://github.com/sarathkumar1207/software-brain-engine/blob/main/docs/benchmark-fastify.md">Read benchmark ↗</a></article>
+          <article><div class="project-name">FastAPI <span>Python</span></div><strong>29%</strong><p>estimated context reduction</p><dl><div><dt>Graph</dt><dd>6,524 symbols</dd></div><div><dt>Impact</dt><dd>4,481 symbols</dd></div><div><dt>Corpus</dt><dd>1,120 files</dd></div></dl><a href="https://github.com/sarathkumar1207/software-brain-engine/blob/main/docs/benchmark-fastapi.md">Read benchmark ↗</a></article>
         </div>
       </section>
 
-      <section class="section why">
-        <div class="section-heading">
-          <p class="label">Why It Matters</p>
-          <h2>Context is the bottleneck in AI-assisted development.</h2>
-        </div>
-        <div class="why-copy">
-          <p>
-            AI tools are strongest when they receive the right code. They become expensive and unreliable when they read entire repositories, infer architecture from partial searches, or miss hidden dependents.
-          </p>
-          <p>
-            SBE reduces unnecessary context by retrieving code through a semantic graph. The result is smaller prompts, clearer dependency awareness, and better refactoring decisions.
-          </p>
-        </div>
-      </section>
-
-      <section class="section case-study" id="fastify-benchmark">
-        <div class="section-heading">
-          <p class="label">Graph Intelligence v2 Benchmark</p>
-          <h2>Validated on real framework checkouts.</h2>
-          <p>
-            SBE scanned Fastify's TypeScript declaration surface and FastAPI's Python source tree, then queried central framework symbols to measure reverse dependency impact and focused context reduction.
-          </p>
-        </div>
-        <div class="analytics-table" role="table" aria-label="Fastify benchmark results">
-          <div role="row" class="table-head">
-            <span>Metric</span>
-            <span>Result</span>
-            <span>Command</span>
-          </div>
-          <div role="row">
-            <span>Fastify graph</span>
-            <span>506 symbols, 207 imports, 2700 edges</span>
-            <span><code>sbe scan</code></span>
-          </div>
-          <div role="row">
-            <span>Impact</span>
-            <span>230 symbols, 24 files, depth 4</span>
-            <span><code>sbe impact FastifyInstance</code></span>
-          </div>
-          <div role="row">
-            <span>FastAPI graph</span>
-            <span>6524 symbols, 3582 imports, 67320 edges</span>
-            <span><code>sbe scan</code></span>
-          </div>
-          <div role="row">
-            <span>FastAPI impact</span>
-            <span>4481 symbols, 706 files, depth 6</span>
-            <span><code>sbe impact FastAPI</code></span>
-          </div>
-          <div role="row">
-            <span>Fastify context</span>
-            <span>~84633 full tokens to ~42335 focused tokens</span>
-            <span><code>sbe benchmark</code></span>
-          </div>
-          <div role="row">
-            <span>FastAPI context</span>
-            <span>~978145 full tokens to ~696741 focused tokens</span>
-            <span><code>sbe benchmark</code></span>
-          </div>
-          <div role="row">
-            <span>FastAPI update</span>
-            <span>1 changed file, 3 modified symbols, 10815 ms</span>
-            <span><code>sbe update</code></span>
-          </div>
-          <div role="row">
-            <span>Fastify reduction</span>
-            <span>~42298 tokens saved, 50%</span>
-            <span>184 ms query</span>
-          </div>
-          <div role="row">
-            <span>FastAPI reduction</span>
-            <span>~281404 tokens saved, 29%</span>
-            <span>10108 ms query</span>
-          </div>
-        </div>
-      </section>
-
-      <section class="section case-study" id="case-study">
-        <div class="section-heading">
-          <p class="label">Live Demo Case Study</p>
-          <h2>Debugging a Hono middleware lifecycle issue with graph context.</h2>
-          <p>
-            This is a realistic simulated demo using <a href="https://github.com/honojs/hono">honojs/hono</a>, a TypeScript web framework. It shows how SBE would guide an AI assistant through a multi-file middleware bug without loading broad framework context.
-          </p>
-        </div>
-
-        <div class="case-grid">
-          <article class="case-card">
-            <h3>Issue</h3>
-            <p>Middleware post-processing after <code>await next()</code> should still apply headers when a downstream handler throws and <code>onError</code> creates the final response.</p>
-            <pre><code>app.use(async (c, next) => {
-  await next()
-  c.header('x-request-processed', 'true')
-})</code></pre>
-          </article>
-
-          <article class="case-card">
-            <h3>SBE Query</h3>
-            <pre><code>$ sbe scan ./hono
-$ sbe graph compose --json
-$ sbe impact compose --json</code></pre>
-            <p>The graph starts from the middleware composition function and follows dependents into dispatch, context response mutation, factory helpers, and tests.</p>
-          </article>
-        </div>
-
-        <div class="analytics-table" role="table" aria-label="Hono demo efficiency comparison">
-          <div role="row" class="table-head">
-            <span>Metric</span>
-            <span>Without SBE</span>
-            <span>With SBE</span>
-          </div>
-          <div role="row">
-            <span>Files read</span>
-            <span>12-16 broad files</span>
-            <span>5-7 focused files</span>
-          </div>
-          <div role="row">
-            <span>Context size</span>
-            <span>~22k-30k tokens</span>
-            <span>~5k-7k tokens</span>
-          </div>
-          <div role="row">
-            <span>Dependency awareness</span>
-            <span>Manual inference</span>
-            <span>Graph-guided</span>
-          </div>
-          <div role="row">
-            <span>Estimated reduction</span>
-            <span>Baseline</span>
-            <span>~68-78%</span>
-          </div>
-        </div>
-
-        <div class="range-panel">
-          <h3>Focused file/range packet</h3>
-          <pre><code>src/compose.ts:18-102
-src/hono-base.ts:210-275
-src/context.ts:120-175
-src/types.ts:40-88
-src/helper/factory/index.ts:12-44
-src/compose.test.ts:1-90
-src/hono-base.test.ts:300-370</code></pre>
-          <p>
-            The numbers are demo estimates until reproduced against a checked-out Hono commit. The purpose is to show the SBE workflow: graph first, focused code ranges second, AI context last.
-          </p>
-        </div>
-      </section>
-
-      <section class="section architecture" id="architecture">
-        <div class="section-heading">
-          <p class="label">Architecture</p>
-          <h2>Simple pipeline. Local storage. Tool-friendly output.</h2>
-        </div>
-        <div class="diagram" aria-label="SBE architecture diagram">
-          <span>Codebase</span>
-          <i></i>
-          <span>Scanner</span>
-          <i></i>
-          <span>Semantic Graph</span>
-          <i></i>
-          <span>Change Simulator</span>
-          <i></i>
-          <span>Context Compiler</span>
-          <i></i>
-          <span>AI</span>
-        </div>
-        <p class="architecture-note">
-          Graph Intelligence v2 adds typed symbol nodes, forward and reverse dependency indexes, incremental updates, graph diffs, impact traversal, and context packs. Context Compiler v2.1 ranks graph symbols, applies token budgets, extracts dependency paths, and emits minimal code ranges. Change Simulator v2.2 predicts modify, delete, and replace impact with deterministic risk, flow, and test analysis. SBE uses Tree-sitter for TypeScript/TSX and a built-in Python plugin; it does not call AI and is not a compiler-grade type checker or runtime analyzer.
-        </p>
-      </section>
-
-      <section class="section use-cases">
-        <div class="section-heading">
-          <p class="label">Use Cases</p>
-          <h2>Built for real code-navigation work.</h2>
-        </div>
-        <div class="use-case-grid">
-          <article>
-            <h3>Impact analysis before refactoring</h3>
-            <p>See dependents and affected files before editing a shared symbol.</p>
-          </article>
-          <article>
-            <h3>Understanding large codebases</h3>
-            <p>Trace services, controllers, DTOs, and database layers without opening broad folders.</p>
-          </article>
-          <article>
-            <h3>AI-assisted development</h3>
-            <p>Give agents structured context packets instead of raw repository dumps.</p>
-          </article>
-          <article>
-            <h3>Dependency visualization</h3>
-            <p>Query relationships between symbols, files, and code layers from the CLI.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section roadmap" id="roadmap">
-        <div class="section-heading">
-          <p class="label">Roadmap</p>
-          <h2>Focused milestones, not feature sprawl.</h2>
-        </div>
-        <ol>
-          <li><strong>v1</strong><span>Graph + impact analysis for TypeScript/TSX repositories.</span></li>
-          <li><strong>v2</strong><span>Bidirectional dependency graph, incremental updates, symbol diffs, impact summaries, and context packs.</span></li>
-          <li><strong>v2.1</strong><span>Python language plugin for classes, functions, imports, references, and FastAPI-scale benchmarks.</span></li>
-          <li><strong>v2.1</strong><span>Context Compiler with ranking, token budgets, dependency paths, deterministic summaries, and reduction metrics.</span></li>
-          <li><strong>v2.2</strong><span>Change Simulator with modify/delete/replace predictions, risk scoring, flow detection, test selection, and recorded reports.</span></li>
-          <li><strong>v3</strong><span>AI context compiler with richer retrieval packets.</span></li>
+      <section class="section workflow">
+        <div class="section-intro"><p class="section-label">One local workflow</p><h2>Use SBE before the risky edit, not after the regression.</h2></div>
+        <ol class="workflow-list">
+          <li><span>01</span><div><h3>Index the repository</h3><p>Tree-sitter extracts files, symbols, imports, references, containment, and reverse relationships into <code>.sbe/</code>.</p></div><code>sbe scan .</code></li>
+          <li><span>02</span><div><h3>Ask about the change</h3><p>Query a symbol directly or describe a planned migration such as “JWT to Passport”.</p></div><code>sbe impact login</code></li>
+          <li><span>03</span><div><h3>Act with focused evidence</h3><p>Review risk and affected flows, run connected tests, or hand the bounded context packet to an AI agent.</p></div><code>sbe context login --budget 4000</code></li>
         </ol>
+      </section>
+
+      <section class="section capabilities">
+        <div class="section-intro"><p class="section-label">What ships today</p><h2>A practical graph engine, not an AI wrapper.</h2></div>
+        <div class="capability-grid">
+          <article><b>G</b><h3>Graph</h3><p>Dependencies, dependents, source ranges, typed symbols, and reverse indexes.</p></article>
+          <article><b>I</b><h3>Impact</h3><p>Bounded transitive traversal with affected symbol, file, and depth summaries.</p></article>
+          <article><b>C</b><h3>Context</h3><p>Deterministic ranking and pruning under 4k, 8k, or custom token budgets.</p></article>
+          <article><b>S</b><h3>Simulate</h3><p>Modify, delete, and replace predictions with risk, flows, and test selection.</p></article>
+          <article><b>Δ</b><h3>Update</h3><p>Incremental graph refresh for added, modified, and removed source files.</p></article>
+          <article><b>{ }</b><h3>JSON</h3><p>Machine-readable output for scripts, CI pipelines, and future agent integrations.</p></article>
+        </div>
+        <div class="limits"><strong>Current boundary</strong><p>SBE is production-alpha. It is syntax and graph based, not a full TypeScript or Python type checker. It does not execute your project or call an AI model.</p></div>
+      </section>
+
+      <section class="section install" id="install">
+        <div><p class="section-label">Start locally</p><h2>One command. No Rust toolchain required.</h2><p>The npm wrapper downloads the matching release binary, verifies its SHA-256 checksum, and caches it under <code>~/.sbe/bin/</code>.</p></div>
+        <div class="install-panel">
+          <div><span>1</span><code>npm install -g sbe-cli</code></div>
+          <div><span>2</span><code>cd your-project && sbe scan .</code></div>
+          <div><span>3</span><code>sbe simulate modify yourSymbol</code></div>
+          <a class="button button-primary" href="https://www.npmjs.com/package/sbe-cli">View sbe-cli on npm</a>
+          <a class="text-link" href="https://github.com/sarathkumar1207/software-brain-engine/releases/latest">Prefer a native binary? Download a release ↗</a>
+        </div>
+      </section>
+
+      <section class="final-cta">
+        <p class="section-label">Build with us</p>
+        <h2>Make code changes easier to understand before they become expensive.</h2>
+        <div><a class="button button-primary" href="https://github.com/sarathkumar1207/software-brain-engine">Star SBE on GitHub</a><a class="button button-ghost" href="https://github.com/sarathkumar1207/software-brain-engine/issues">Open an issue</a></div>
       </section>
     </main>
 
     <footer>
-      <strong>Software Brain Engine</strong>
-      <span>MIT licensed infrastructure for precise AI code context.</span>
-      <a href="https://github.com/sarathkumar1207/software-brain-engine">GitHub</a>
+      <div class="brand"><img src="logo.svg" alt="" /><span>Software Brain Engine</span></div>
+      <p>Local semantic graph infrastructure for safer code changes and focused AI context.</p>
+      <nav aria-label="Footer navigation"><a href="https://github.com/sarathkumar1207/software-brain-engine">GitHub</a><a href="https://www.npmjs.com/package/sbe-cli">npm</a><a href="https://github.com/sarathkumar1207/software-brain-engine/blob/main/CONTRIBUTING.md">Contribute</a><a href="https://github.com/sarathkumar1207/software-brain-engine/blob/main/LICENSE">MIT License</a></nav>
     </footer>
   </body>
 </html>

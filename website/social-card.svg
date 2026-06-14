@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#07110e"/>
+  <g stroke="#20382f" opacity=".7"><path d="M0 90h1200M0 180h1200M0 270h1200M0 360h1200M0 450h1200M0 540h1200"/><path d="M120 0v630M240 0v630M360 0v630M480 0v630M600 0v630M720 0v630M840 0v630M960 0v630M1080 0v630"/></g>
+  <circle cx="1040" cy="110" r="270" fill="#57d39b" opacity=".08"/>
+  <text x="80" y="105" fill="#b8f36b" font-family="monospace" font-size="22" letter-spacing="3">SOFTWARE BRAIN ENGINE</text>
+  <text x="80" y="250" fill="#f3f7f4" font-family="Arial, sans-serif" font-weight="700" font-size="72">Know what your code</text>
+  <text x="80" y="334" fill="#f3f7f4" font-family="Arial, sans-serif" font-weight="700" font-size="72">change will break.</text>
+  <text x="80" y="410" fill="#9eb0a8" font-family="Arial, sans-serif" font-size="27">Local semantic graph · Impact analysis · Focused AI context</text>
+  <rect x="80" y="475" width="390" height="64" rx="10" fill="#b8f36b"/><text x="112" y="516" fill="#07110e" font-family="monospace" font-size="21">npm install -g sbe-cli</text>
+  <g transform="translate(940 350)"><path d="M0 0L-100-80M0 0L105-88M0 0L100 80M0 0L-105 88" stroke="#57d39b" stroke-width="4"/><circle r="25" fill="#b8f36b"/><circle cx="-100" cy="-80" r="14" fill="#57d39b"/><circle cx="105" cy="-88" r="14" fill="#57d39b"/><circle cx="100" cy="80" r="14" fill="#57d39b"/><circle cx="-105" cy="88" r="14" fill="#57d39b"/></g>
+</svg>

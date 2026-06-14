@@ -1,0 +1,27 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1280
+PlayResY: 720
+WrapStyle: 2
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Terminal,Consolas,28,&H00E8F3ED,&H00E8F3ED,&H00050907,&H00050907,0,0,0,0,100,100,0,0,1,0,0,7,62,45,54,1
+Style: Prompt,Consolas,28,&H006BF3B8,&H006BF3B8,&H00050907,&H00050907,1,0,0,0,100,100,0,0,1,0,0,7,62,45,54,1
+Style: Muted,Consolas,23,&H00A8B9B0,&H00A8B9B0,&H00050907,&H00050907,0,0,0,0,100,100,0,0,1,0,0,7,62,45,54,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.00,0:00:03.00,Prompt,,0,0,0,,> sbe version
+Dialogue: 0,0:00:00.70,0:00:03.00,Terminal,,0,0,42,,Software Brain Engine 0.4.0\Nstorage version 1 · target windows
+Dialogue: 0,0:00:03.00,0:00:09.00,Prompt,,0,0,0,,> sbe scan ./auth-service
+Dialogue: 0,0:00:04.00,0:00:09.00,Terminal,,0,0,42,,SBE scan complete\N  indexed files : 6\N  graph         : 12 symbols, 3 imports, 14 edges\N  elapsed       : 51 ms\N  storage       : ./auth-service/.sbe
+Dialogue: 0,0:00:09.00,0:00:14.00,Prompt,,0,0,0,,> sbe graph login
+Dialogue: 0,0:00:10.00,0:00:14.00,Terminal,,0,0,42,,login Method\Ndependencies:\N  -> verifyJwt Function\Ndependents:\N  <- AuthService Class
+Dialogue: 0,0:00:14.00,0:00:18.00,Prompt,,0,0,0,,> sbe impact login
+Dialogue: 0,0:00:15.00,0:00:18.00,Terminal,,0,0,42,,Affected Symbols: 5\NAffected Files: 3\NDepth: 3
+Dialogue: 0,0:00:18.00,0:00:24.00,Prompt,,0,0,0,,> sbe context login --budget 1200
+Dialogue: 0,0:00:19.00,0:00:24.00,Terminal,,0,0,42,,Root Symbol: login\NDependencies: verifyJwt\NCallers: AuthService\NContext Reduction: 16.7%
+Dialogue: 0,0:00:24.00,0:00:32.00,Prompt,,0,0,0,,> sbe simulate modify login
+Dialogue: 0,0:00:25.00,0:00:32.00,Terminal,,0,0,42,,Simulation: Modify login\NRisk: MEDIUM (36.5/100)\N\NAffected Symbols: 10 · Files: 4 · Depth: 3\NAffected Flows: authMiddleware, login, AuthController,\N                authenticate, AuthService\NContext: 10 symbols, 4 files, ~680 tokens
+Dialogue: 0,0:00:30.50,0:00:32.00,Muted,,0,0,590,,Local analysis. No source uploaded. No AI call.
