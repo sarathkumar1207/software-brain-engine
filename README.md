@@ -21,7 +21,7 @@
 [![Language Scope](https://img.shields.io/badge/scope-TypeScript%20%7C%20TSX%20%7C%20Python-3178c6.svg)](docs/architecture.md)
 [![Status](https://img.shields.io/badge/status-production--alpha-yellow.svg)](docs/governance.md)
 
-Software Brain Engine (`sbe`) is a local code-intelligence CLI for TypeScript, TSX, and Python projects. It builds a semantic index of your repository, then returns focused impact reports for planned code changes so LLMs do not need to read the whole codebase.
+Software Brain Engine (`sbe`) is a local code-intelligence engine for TypeScript, TSX, and Python projects. It builds and maintains a semantic index of your repository, then returns focused impact, trace, and context reports so developers and AI agents do not need to read the whole codebase.
 
 The goal is simple: install once, run `sbe`, and give developers or AI agents the smallest useful context for a change.
 
@@ -35,6 +35,9 @@ AI coding tools are powerful, but they often waste context by reading too much c
 - store a local binary index under `.sbe/`
 - ask a change question such as `jwt to passport`
 - get impacted symbols, files, layers, dependencies, and token estimates
+- keep the index warm with `sbe watch`
+- map `git diff` to changed and impacted symbols
+- trace dependency paths for a symbol
 - update changed files incrementally without rebuilding the whole graph
 - send the focused context to an LLM instead of the full codebase
 
@@ -143,6 +146,9 @@ Current scope:
 - Graph Intelligence v2 typed symbol and relationship graph
 - bidirectional caller/callee lookup
 - incremental index updates with `sbe update`
+- watch mode with recursive filesystem events and path-based re-indexing
+- git diff integration for working tree and base revisions such as `HEAD~1`
+- trace engine with text and JSON output
 - symbol version diffing for added, modified, and removed symbols
 - Context Compiler v2.1 for deterministic, budgeted context packs
 - Change Simulator v2.2 for modify, delete, and replace predictions
@@ -151,14 +157,13 @@ Current scope:
 - benchmark and validation reports
 - Windows MSI release workflow
 - Linux/macOS release archives
+- VS Code extension foundation under `extensions/vscode`
 
 Not yet:
 
 - full TypeScript type resolution
 - full Python type resolution, decorator evaluation, or runtime import execution
-- watch mode
 - exact model-tokenizer counting
-- editor extension
 - large public benchmark suite
 
 ## Install
@@ -232,6 +237,26 @@ Incrementally refresh changed files after a scan:
 sbe update C:\path\to\typescript-project
 ```
 
+Keep the index updated while you edit:
+
+```powershell
+sbe watch C:\path\to\typescript-project
+```
+
+Map the current git working tree, or a base revision, to changed and impacted symbols:
+
+```powershell
+sbe diff --path C:\path\to\typescript-project
+sbe diff HEAD~1 --path C:\path\to\typescript-project
+```
+
+Trace a symbol path:
+
+```powershell
+sbe trace AuthService.login C:\path\to\typescript-project
+sbe trace AuthService.login C:\path\to\typescript-project --json
+```
+
 Check index health:
 
 ```powershell
@@ -299,6 +324,9 @@ sbe export-json C:\path\to\typescript-project
 | `sbe init <path>` | Create `.sbe/` metadata. |
 | `sbe scan <path>` | Build or refresh the local index. |
 | `sbe update <path>` | Incrementally update changed files in the existing index. |
+| `sbe watch <path>` | Continuously re-index created, modified, deleted, and renamed source files. |
+| `sbe diff [base] --path <path>` | Map git changes to changed and impacted symbols. |
+| `sbe trace <symbol> <path>` | Print a dependency path for a symbol. |
 | `sbe inspect <symbol> <path>` | Return context packets for a symbol. |
 | `sbe graph <symbol> <path>` | Show dependencies and dependents. |
 | `sbe impact <symbol> <path>` | Show transitive impact. |
@@ -363,17 +391,38 @@ See [docs/benchmark.md](docs/benchmark.md) for the benchmark methodology and how
 SBE is a Rust workspace:
 
 - `common`: shared public data types
+- `events`: typed internal event bus for file, graph, index, and impact events
 - `scanner`: repository traversal and file hashing
 - `storage`: binary `.sbe/` persistence
 - `parser`: TypeScript extraction plus Python language plugin
 - `symbols`: in-memory symbol indexes
 - `graph`: typed dependency graph with forward/reverse indexes, diffs, impact traversal, and context packs
 - `impact`: reverse dependency analysis reports
+- `trace`: dependency path resolver and text/JSON formatter
+- `git`: git status/diff mapping to changed and impacted symbols
 - `context`: deterministic context compiler, ranking, budget pruning, dependency paths, and code ranges
 - `simulator`: bounded graph traversal, risk scoring, flow detection, test selection, and context assembly
 - `query`: context, benchmark, and change-analysis reports
 - `indexer`: full scan and incremental update pipeline
+- `watch`: notify-based recursive filesystem watcher and event publishing
 - `cli`: user-facing command line
+
+```mermaid
+flowchart LR
+  FS["Filesystem events"] --> Watch["watch"]
+  Git["git status/diff"] --> GitMap["git"]
+  Watch --> Bus["events bus"]
+  Bus --> Indexer["indexer"]
+  GitMap --> Indexer
+  Indexer --> Storage[".sbe storage"]
+  Storage --> Graph["symbol/import/reference graph"]
+  Graph --> Impact["impact"]
+  Graph --> Trace["trace"]
+  Graph --> Context["context compiler"]
+  Impact --> CLI["CLI / VS Code / JSON"]
+  Trace --> CLI
+  Context --> CLI
+```
 
 See [docs/architecture.md](docs/architecture.md), [docs/context-compiler.md](docs/context-compiler.md), and [docs/change-simulator.md](docs/change-simulator.md).
 Review hardening notes are tracked in [docs/review-issues.md](docs/review-issues.md).
@@ -415,6 +464,8 @@ Open locally:
 website/index.html
 ```
 
+The VS Code extension foundation lives in [extensions/vscode](extensions/vscode). It contributes `SBE: Trace Symbol`, `SBE: Show Impact`, and `SBE: Explain Symbol`, shells out to the local CLI, parses JSON output, and renders a tree view.
+
 ## Development
 
 ```powershell
@@ -437,11 +488,10 @@ Community and project policies:
 
 ## Roadmap
 
-- `sbe watch` for automatic incremental indexing
 - exact tokenizer support
 - richer TypeScript import/call resolution
 - public benchmark corpus
-- editor integration
+- packaged VS Code Marketplace release
 - signed installers
 - package-manager distribution
 

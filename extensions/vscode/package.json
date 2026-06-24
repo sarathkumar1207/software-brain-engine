@@ -1,0 +1,64 @@
+{
+  "name": "sbe-vscode",
+  "displayName": "Software Brain Engine",
+  "description": "Trace symbols and inspect impact using the local SBE CLI.",
+  "version": "0.1.0",
+  "publisher": "sbe",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:sbe.traceSymbol",
+    "onCommand:sbe.showImpact",
+    "onCommand:sbe.explainSymbol"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "sbe.traceSymbol",
+        "title": "SBE: Trace Symbol"
+      },
+      {
+        "command": "sbe.showImpact",
+        "title": "SBE: Show Impact"
+      },
+      {
+        "command": "sbe.explainSymbol",
+        "title": "SBE: Explain Symbol"
+      }
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "sbeResults",
+          "name": "SBE"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Software Brain Engine",
+      "properties": {
+        "sbe.binaryPath": {
+          "type": "string",
+          "default": "sbe",
+          "description": "Path to the SBE CLI binary."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "watch": "tsc -watch -p .",
+    "vscode:prepublish": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/vscode": "^1.90.0",
+    "typescript": "^5.5.0"
+  }
+}

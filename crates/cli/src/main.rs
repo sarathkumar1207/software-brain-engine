@@ -1,10 +1,12 @@
 use clap::{Args, Parser, Subcommand};
 use sbe_context::ContextPack;
+use sbe_git::analyze_git_diff;
 use sbe_impact::ImpactReport;
 use sbe_indexer::{IndexReport, Indexer};
 use sbe_query::{BenchmarkReport, QueryEngine};
 use sbe_simulator::{RiskLevel, SimulationOperation, SimulationReport};
 use sbe_storage::Store;
+use sbe_trace::{format_text, TraceJson, TraceResolver};
 use serde::Serialize;
 use std::collections::HashSet;
 use std::path::PathBuf;
@@ -75,6 +77,27 @@ enum Commands {
         path: PathBuf,
         #[arg(long)]
         json: bool,
+    },
+    /// Continuously re-index changed files without full repository scans.
+    Watch {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+    },
+    /// Show indexed symbols changed by git status or a base revision and their impact.
+    Diff {
+        base: Option<String>,
+        #[arg(long, default_value = ".")]
+        path: PathBuf,
+        #[arg(long)]
+        json: bool,
+    },
+    /// Show a dependency path for a symbol.
+    Trace {
+        name: String,
+        #[arg(long)]
+        json: bool,
+        #[arg(default_value = ".")]
+        path: PathBuf,
     },
     /// Analyze a planned change for AI-focused impact and token savings.
     AnalyzeChange {
@@ -351,6 +374,43 @@ fn main() -> anyhow::Result<()> {
                     for warning in report.warnings.iter().take(5) {
                         println!("    - {warning}");
                     }
+                }
+            }
+        }
+        Commands::Watch { path } => {
+            sbe_watch::run_watch(path)?;
+        }
+        Commands::Diff { path, json, base } => {
+            let report = analyze_git_diff(path, base.as_deref())?;
+            if json {
+                println!("{}", serde_json::to_string_pretty(&report)?);
+            } else {
+                println!("Changed Symbols");
+                println!();
+                for symbol in &report.changed_symbols {
+                    println!("{}", symbol.name);
+                }
+                println!();
+                println!("Impacted Symbols");
+                println!();
+                for symbol in &report.impacted_symbols {
+                    println!("{}", symbol.name);
+                }
+            }
+        }
+        Commands::Trace { name, json, path } => {
+            let traces = TraceResolver::from_repo(path)?.trace(&name);
+            if json {
+                let json_traces: Vec<TraceJson> = traces.into_iter().map(Into::into).collect();
+                println!("{}", serde_json::to_string_pretty(&json_traces)?);
+            } else if traces.is_empty() {
+                println!("no symbols found for {name}");
+            } else {
+                for (index, trace) in traces.iter().enumerate() {
+                    if index > 0 {
+                        println!();
+                    }
+                    println!("{}", format_text(trace));
                 }
             }
         }

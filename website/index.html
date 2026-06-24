@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>SBE | Know what your code change will break</title>
-    <meta name="description" content="Software Brain Engine maps code dependencies, predicts change impact, and compiles focused context for developers and AI coding agents." />
+    <title>SBE | Continuous repo intelligence for AI coding</title>
+    <meta name="description" content="Software Brain Engine keeps a local semantic graph warm with watch mode, git diff impact, traces, and focused context for developers and AI coding agents." />
     <meta name="theme-color" content="#07110e" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Know what your code change will break" />
-    <meta property="og:description" content="A local semantic graph for impact analysis, change simulation, and focused AI context." />
+    <meta property="og:title" content="Continuous repo intelligence for AI coding" />
+    <meta property="og:description" content="Local watch mode, git diff impact, trace paths, and focused AI context from one semantic graph." />
     <meta property="og:url" content="https://sarathkumar1207.github.io/software-brain-engine/" />
     <meta property="og:image" content="https://sarathkumar1207.github.io/software-brain-engine/social-card.svg" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -38,19 +38,19 @@
       <section class="hero" id="top">
         <div class="hero-copy">
           <p class="kicker"><span></span> Open source. Local first. No AI calls.</p>
-          <h1>Know what your code change will break.</h1>
-          <p class="hero-lead">SBE builds a semantic graph of your TypeScript, TSX, or Python codebase, then shows affected symbols, files, flows, tests, and the smallest useful context before you edit.</p>
+          <h1>Keep your repo graph alive while you code.</h1>
+          <p class="hero-lead">SBE watches TypeScript, TSX, and Python repositories, updates only changed files, maps git diffs to impacted symbols, and traces dependency paths for developers and AI agents.</p>
           <div class="install-command">
             <span>$</span><code>npm install -g sbe-cli</code>
             <button class="copy-button" data-copy="npm install -g sbe-cli" aria-label="Copy install command">Copy</button>
           </div>
           <div class="hero-actions">
-            <a class="button button-primary" href="#demo">Watch the 30-second demo</a>
+            <a class="button button-primary" href="#install">Install the CLI</a>
             <a class="button button-ghost" href="https://github.com/sarathkumar1207/software-brain-engine">Explore the source</a>
           </div>
           <div class="trust-row" aria-label="Project facts">
             <span><strong>MIT</strong> licensed</span>
-            <span><strong>4</strong> native platforms</span>
+            <span><strong>watch</strong> mode</span>
             <span><strong>0</strong> cloud dependencies</span>
           </div>
         </div>
@@ -65,31 +65,31 @@
             <path d="M310 260 L178 138 M310 260 L445 137 M310 260 L472 358 M310 260 L148 371" />
             <path class="pulse" d="M178 138 L445 137 M445 137 L472 358" />
           </svg>
-          <div class="impact-card"><small>Predicted impact</small><strong>10 symbols · 4 files</strong><span>MEDIUM RISK · 36.5/100</span></div>
+          <div class="impact-card"><small>Updated from git diff</small><strong>10 symbols / 4 files</strong><span>TRACE + IMPACT + JSON</span></div>
         </div>
       </section>
 
       <section class="signal-strip" aria-label="Core outcomes">
-        <div><span>01</span><strong>Map dependencies</strong><p>See callers and callees without opening broad folders.</p></div>
-        <div><span>02</span><strong>Predict blast radius</strong><p>Find affected files, entry flows, and connected tests before editing.</p></div>
-        <div><span>03</span><strong>Compile context</strong><p>Give AI agents ranked code ranges under an explicit token budget.</p></div>
+        <div><span>01</span><strong>Watch changes</strong><p>Created, modified, deleted, and renamed files re-index without a full scan.</p></div>
+        <div><span>02</span><strong>Read git diffs</strong><p>Turn working tree or HEAD~1 changes into changed and impacted symbols.</p></div>
+        <div><span>03</span><strong>Trace paths</strong><p>Show why a symbol matters through caller, import, and reference graph paths.</p></div>
       </section>
 
       <section class="section problem" id="problem">
         <div class="section-intro">
           <p class="section-label">The real problem</p>
-          <h2>Code changes fail at the connections you did not see.</h2>
+          <h2>AI coding needs a living map, not another broad scan.</h2>
         </div>
         <div class="problem-grid">
           <article><span>Before</span><h3>Search is not impact analysis.</h3><p>Text search finds names. It does not reliably explain which callers, flows, files, and tests depend on the symbol you plan to change.</p></article>
-          <article><span>Before</span><h3>AI context gets expensive fast.</h3><p>Coding agents inspect broad directories because they lack a reusable structural map. More context still does not guarantee the right context.</p></article>
-          <article class="solution-card"><span>With SBE</span><h3>Query the graph first.</h3><p>Scan locally once. Ask for impact or a simulated change. Pass the focused result to a developer, review process, or AI tool.</p></article>
+          <article><span>Before</span><h3>Scans go stale.</h3><p>One-time indexes help demos, but real editing needs fast updates as files change and branches move.</p></article>
+          <article class="solution-card"><span>With SBE</span><h3>Keep the graph hot.</h3><p>Run watch mode, ask git what changed, trace a symbol, and pass focused JSON to a developer, review process, or AI tool.</p></article>
         </div>
       </section>
 
       <section class="section demo-section" id="demo">
         <div class="section-intro demo-intro">
-          <div><p class="section-label">Real CLI demo</p><h2>From repository to change plan in seconds.</h2></div>
+          <div><p class="section-label">Real CLI workflow</p><h2>From edit to graph update without a full rescan.</h2></div>
           <p>Recorded from SBE 0.4.0 against the included authentication fixture. The output below is real, reproducible, and runs entirely on the local machine.</p>
         </div>
         <div class="video-shell">
@@ -100,9 +100,9 @@
           </video>
         </div>
         <div class="demo-steps">
-          <div><code>sbe scan .</code><strong>Build the graph</strong><span>12 symbols, 14 edges in 51 ms</span></div>
-          <div><code>sbe impact login</code><strong>Trace dependents</strong><span>5 symbols across 3 files</span></div>
-          <div><code>sbe simulate modify login</code><strong>Plan the edit</strong><span>Risk, flows, tests, and context</span></div>
+          <div><code>sbe watch .</code><strong>Keep the graph updated</strong><span>Changed files only, no repository walk</span></div>
+          <div><code>sbe diff HEAD~1</code><strong>Map changed symbols</strong><span>Working tree or base revision impact</span></div>
+          <div><code>sbe trace login --json</code><strong>Explain the path</strong><span>Tree output for humans, JSON for tools</span></div>
         </div>
       </section>
 
@@ -134,7 +134,9 @@
           <article><b>I</b><h3>Impact</h3><p>Bounded transitive traversal with affected symbol, file, and depth summaries.</p></article>
           <article><b>C</b><h3>Context</h3><p>Deterministic ranking and pruning under 4k, 8k, or custom token budgets.</p></article>
           <article><b>S</b><h3>Simulate</h3><p>Modify, delete, and replace predictions with risk, flows, and test selection.</p></article>
-          <article><b>Δ</b><h3>Update</h3><p>Incremental graph refresh for added, modified, and removed source files.</p></article>
+          <article><b>W</b><h3>Watch</h3><p>Notify-powered recursive watch mode with ignored build and dependency folders.</p></article>
+          <article><b>D</b><h3>Diff</h3><p>Git status and revision diffs mapped to symbols, graph nodes, and impacted dependents.</p></article>
+          <article><b>T</b><h3>Trace</h3><p>Dependency paths across symbol, import, and reference graph relationships.</p></article>
           <article><b>{ }</b><h3>JSON</h3><p>Machine-readable output for scripts, CI pipelines, and future agent integrations.</p></article>
         </div>
         <div class="limits"><strong>Current boundary</strong><p>SBE is production-alpha. It is syntax and graph based, not a full TypeScript or Python type checker. It does not execute your project or call an AI model.</p></div>
@@ -145,7 +147,8 @@
         <div class="install-panel">
           <div><span>1</span><code>npm install -g sbe-cli</code></div>
           <div><span>2</span><code>cd your-project && sbe scan .</code></div>
-          <div><span>3</span><code>sbe simulate modify yourSymbol</code></div>
+          <div><span>3</span><code>sbe watch .</code></div>
+          <div><span>4</span><code>sbe diff HEAD~1 && sbe trace login</code></div>
           <a class="button button-primary" href="https://www.npmjs.com/package/sbe-cli">View sbe-cli on npm</a>
           <a class="text-link" href="https://github.com/sarathkumar1207/software-brain-engine/releases/latest">Prefer a native binary? Download a release ↗</a>
         </div>

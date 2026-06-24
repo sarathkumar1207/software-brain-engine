@@ -1,16 +1,20 @@
 [workspace]
 members = [
   "crates/common",
+  "crates/events",
   "crates/scanner",
   "crates/storage",
   "crates/parser",
   "crates/symbols",
   "crates/graph",
   "crates/impact",
+  "crates/trace",
+  "crates/git",
   "crates/context",
   "crates/simulator",
   "crates/query",
   "crates/indexer",
+  "crates/watch",
   "crates/cli",
 ]
 resolver = "2"
@@ -25,6 +29,8 @@ anyhow = "1"
 bincode = { version = "2", features = ["serde"] }
 blake3 = "1"
 clap = { version = "4", features = ["derive"] }
+git2 = "0.19"
+notify = "6"
 petgraph = "0.8"
 rayon = "1"
 rustc-hash = "2"
@@ -39,13 +45,17 @@ tree-sitter-typescript = "0.23"
 walkdir = "2"
 
 sbe-common = { path = "crates/common" }
+sbe-events = { path = "crates/events" }
 sbe-scanner = { path = "crates/scanner" }
 sbe-storage = { path = "crates/storage" }
 sbe-parser = { path = "crates/parser" }
 sbe-symbols = { path = "crates/symbols" }
 sbe-graph = { path = "crates/graph" }
 sbe-impact = { path = "crates/impact" }
+sbe-trace = { path = "crates/trace" }
+sbe-git = { path = "crates/git" }
 sbe-context = { path = "crates/context" }
 sbe-simulator = { path = "crates/simulator" }
 sbe-query = { path = "crates/query" }
 sbe-indexer = { path = "crates/indexer" }
+sbe-watch = { path = "crates/watch" }

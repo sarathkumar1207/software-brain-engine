@@ -59,33 +59,18 @@ impl Scanner {
             .filter(|entry| self.is_source(entry.path()))
         {
             let path = entry.path();
-            let bytes = match std::fs::read(path) {
-                Ok(bytes) => bytes,
+            let file_entry = match self.file_entry(path) {
+                Ok(Some(file_entry)) => file_entry,
+                Ok(None) => continue,
                 Err(error) => {
                     warnings.push(format!("failed to read {}: {error}", path.display()));
                     continue;
                 }
             };
-            bytes_read += bytes.len() as u64;
-            let hash = blake3::hash(&bytes).to_hex().to_string();
-            let relative_path = path
-                .strip_prefix(&self.root)
-                .unwrap_or(path)
-                .to_string_lossy()
-                .replace('\\', "/");
-            let extension = path
-                .extension()
-                .and_then(|ext| ext.to_str())
-                .unwrap_or_default()
-                .to_string();
-
-            entries.push(FileEntry {
-                id: stable_id(&relative_path),
-                path: path.to_string_lossy().to_string(),
-                relative_path,
-                hash,
-                extension,
-            });
+            bytes_read += std::fs::metadata(path)
+                .map(|metadata| metadata.len())
+                .unwrap_or(0);
+            entries.push(file_entry);
         }
 
         entries.sort_by(|a, b| a.relative_path.cmp(&b.relative_path));
@@ -106,6 +91,33 @@ impl Scanner {
             .map(|ext| self.extensions.iter().any(|allowed| allowed == ext))
             .unwrap_or(false)
     }
+
+    pub fn file_entry(&self, path: &Path) -> anyhow::Result<Option<FileEntry>> {
+        if is_ignored_path(path) || !self.is_source(path) || !path.is_file() {
+            return Ok(None);
+        }
+
+        let bytes = std::fs::read(path)?;
+        let hash = blake3::hash(&bytes).to_hex().to_string();
+        let relative_path = path
+            .strip_prefix(&self.root)
+            .unwrap_or(path)
+            .to_string_lossy()
+            .replace('\\', "/");
+        let extension = path
+            .extension()
+            .and_then(|ext| ext.to_str())
+            .unwrap_or_default()
+            .to_string();
+
+        Ok(Some(FileEntry {
+            id: stable_id(&relative_path),
+            path: path.to_string_lossy().to_string(),
+            relative_path,
+            hash,
+            extension,
+        }))
+    }
 }
 
 fn stable_id(value: &str) -> u64 {
@@ -115,7 +127,7 @@ fn stable_id(value: &str) -> u64 {
     u64::from_le_bytes(bytes)
 }
 
-fn is_ignored_path(path: &Path) -> bool {
+pub fn is_ignored_path(path: &Path) -> bool {
     const IGNORED: &[&str] = &[
         ".git",
         ".sbe",

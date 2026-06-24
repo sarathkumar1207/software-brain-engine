@@ -1,5 +1,5 @@
 use rayon::prelude::*;
-use sbe_common::{Edge, FileEntry, IndexSnapshot, ParsedFile, RelationType};
+use sbe_common::{Edge, FileEntry, IndexSnapshot, ParsedFile, RelationType, Symbol};
 use sbe_graph::{GraphDiff, SemanticGraph};
 use sbe_parser::TypeScriptParser;
 use sbe_scanner::Scanner;
@@ -237,6 +237,136 @@ impl Indexer {
         })
     }
 
+    pub fn update_paths(
+        &mut self,
+        changed_paths: impl IntoIterator<Item = impl AsRef<Path>>,
+    ) -> anyhow::Result<UpdateReport> {
+        let started = std::time::Instant::now();
+        let old_snapshot = self.store.read_snapshot_or_empty(&self.root)?;
+        let mut warnings = Vec::new();
+        let mut changed = Vec::new();
+        let mut current_by_path: HashMap<String, FileEntry> = old_snapshot
+            .files
+            .iter()
+            .cloned()
+            .map(|file| (file.relative_path.clone(), file))
+            .collect();
+        let mut files_to_parse = Vec::new();
+
+        for path in changed_paths {
+            let absolute_path = normalize_absolute_path(&self.root, path.as_ref());
+            let relative_path = relative_path(&self.root, &absolute_path);
+            changed.push(relative_path.clone());
+
+            if absolute_path.exists() {
+                match self.scanner.file_entry(&absolute_path) {
+                    Ok(Some(file)) => {
+                        current_by_path.insert(file.relative_path.clone(), file.clone());
+                        files_to_parse.push(file);
+                    }
+                    Ok(None) => {
+                        current_by_path.remove(&relative_path);
+                    }
+                    Err(error) => {
+                        warnings.push(format!(
+                            "failed to read {}: {error}",
+                            absolute_path.display()
+                        ));
+                    }
+                }
+            } else {
+                current_by_path.remove(&relative_path);
+            }
+        }
+
+        changed.sort();
+        changed.dedup();
+
+        if changed.is_empty() {
+            return empty_update_report(&self.store, started, warnings);
+        }
+
+        let changed_path_set: std::collections::HashSet<&str> =
+            changed.iter().map(String::as_str).collect();
+        let old_changed_file_ids: std::collections::HashSet<u64> = old_snapshot
+            .files
+            .iter()
+            .filter(|file| changed_path_set.contains(file.relative_path.as_str()))
+            .map(|file| file.id)
+            .collect();
+        let changed_symbol_ids: std::collections::HashSet<u64> =
+            symbols_in_files(&old_snapshot.symbols, &old_changed_file_ids);
+
+        let parsed_results: Vec<anyhow::Result<ParsedFile>> =
+            files_to_parse.par_iter().map(parse_file).collect();
+        let mut parsed_files = Vec::new();
+        for result in parsed_results {
+            match result {
+                Ok(parsed) => parsed_files.push(parsed),
+                Err(error) => warnings.push(error.to_string()),
+            }
+        }
+
+        let mut snapshot = IndexSnapshot::empty(self.root.to_string_lossy().to_string());
+        snapshot.files = current_by_path.into_values().collect();
+        snapshot
+            .files
+            .sort_by(|a, b| a.relative_path.cmp(&b.relative_path));
+        snapshot.symbols = old_snapshot
+            .symbols
+            .iter()
+            .filter(|symbol| !old_changed_file_ids.contains(&symbol.file_id))
+            .cloned()
+            .collect();
+        snapshot.imports = old_snapshot
+            .imports
+            .iter()
+            .filter(|import| !old_changed_file_ids.contains(&import.file_id))
+            .cloned()
+            .collect();
+        snapshot.edges = old_snapshot
+            .edges
+            .iter()
+            .filter(|edge| edge.relation != RelationType::Imports)
+            .filter(|edge| {
+                !changed_symbol_ids.contains(&edge.from) && !changed_symbol_ids.contains(&edge.to)
+            })
+            .cloned()
+            .collect();
+
+        for parsed in parsed_files {
+            snapshot.symbols.extend(parsed.symbols);
+            snapshot.imports.extend(parsed.imports);
+            snapshot.edges.extend(parsed.edges);
+        }
+
+        let (import_edges, import_warnings) = resolve_import_edges(&snapshot);
+        warnings.extend(import_warnings);
+        snapshot.edges.extend(import_edges);
+        dedupe_edges(&mut snapshot.edges);
+
+        let diff = SemanticGraph::diff(
+            &SemanticGraph::from_snapshot(&old_snapshot),
+            &SemanticGraph::from_snapshot(&snapshot),
+        );
+        let affected_symbols = affected_symbols(&diff);
+        self.store.write_snapshot(&snapshot)?;
+
+        Ok(UpdateReport {
+            changed_files: changed,
+            added_symbols: diff.added_symbols.len(),
+            modified_symbols: diff.modified_symbols.len(),
+            removed_symbols: diff.removed_symbols.len(),
+            affected_files: affected_file_count(&snapshot, &affected_symbols),
+            affected_symbols,
+            edges_found: snapshot.edges.len(),
+            storage_path: self.store.root().display().to_string(),
+            index_size_bytes: self.store.index_size().unwrap_or_default(),
+            elapsed_ms: started.elapsed().as_millis(),
+            warnings,
+        })
+    }
+
     pub fn doctor(root: impl Into<PathBuf>) -> anyhow::Result<DoctorReport> {
         let root = root.into();
         let scanner = Scanner::new(&root);
@@ -274,6 +404,61 @@ impl Indexer {
             warnings,
         })
     }
+}
+
+fn parse_file(file: &FileEntry) -> anyhow::Result<ParsedFile> {
+    let source = std::fs::read_to_string(&file.path)
+        .map_err(|error| anyhow::anyhow!("failed to read {}: {error}", file.path))?;
+    let mut parser = TypeScriptParser::new();
+    parser
+        .parse_file(file, &source)
+        .map_err(|error| anyhow::anyhow!("failed to parse {}: {error}", file.path))
+}
+
+fn empty_update_report(
+    store: &Store,
+    started: std::time::Instant,
+    warnings: Vec<String>,
+) -> anyhow::Result<UpdateReport> {
+    Ok(UpdateReport {
+        changed_files: Vec::new(),
+        added_symbols: 0,
+        modified_symbols: 0,
+        removed_symbols: 0,
+        affected_symbols: Vec::new(),
+        affected_files: 0,
+        edges_found: 0,
+        storage_path: store.root().display().to_string(),
+        index_size_bytes: store.index_size().unwrap_or_default(),
+        elapsed_ms: started.elapsed().as_millis(),
+        warnings,
+    })
+}
+
+fn symbols_in_files(
+    symbols: &[Symbol],
+    file_ids: &std::collections::HashSet<u64>,
+) -> std::collections::HashSet<u64> {
+    symbols
+        .iter()
+        .filter(|symbol| file_ids.contains(&symbol.file_id))
+        .map(|symbol| symbol.id)
+        .collect()
+}
+
+fn normalize_absolute_path(root: &Path, path: &Path) -> PathBuf {
+    if path.is_absolute() {
+        path.to_path_buf()
+    } else {
+        root.join(path)
+    }
+}
+
+fn relative_path(root: &Path, path: &Path) -> String {
+    path.strip_prefix(root)
+        .unwrap_or(path)
+        .to_string_lossy()
+        .replace('\\', "/")
 }
 
 fn changed_paths(old_snapshot: &IndexSnapshot, current_files: &[FileEntry]) -> Vec<String> {

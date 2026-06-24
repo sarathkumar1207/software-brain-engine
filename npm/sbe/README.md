@@ -4,7 +4,7 @@ This package installs the `sbe` command for Software Brain Engine.
 
 It is a Node.js wrapper around the native Rust engine. The wrapper downloads the correct prebuilt binary from GitHub Releases on install or first run, caches it under `~/.sbe/bin/<version>/`, and forwards commands to the Rust executable.
 
-SBE indexes TypeScript, TSX, and Python projects. Python support is provided by the built-in Python language plugin.
+SBE indexes TypeScript, TSX, and Python projects, keeps the local graph updated with watch mode, maps git diffs to impacted symbols, and returns trace/context JSON for scripts and AI coding agents.
 
 ## Install
 
@@ -22,7 +22,11 @@ npx sbe-cli scan .
 
 ```bash
 sbe scan .
+sbe watch .
 sbe update .
+sbe diff
+sbe diff HEAD~1
+sbe trace AuthService.login --json
 sbe graph createUser --json
 sbe impact saveUser
 sbe context createUser --budget 4000 --json
@@ -34,7 +38,13 @@ sbe explain "jwt to passport" --json
 
 `sbe explain <flow>` maps to the Rust CLI command `sbe analyze-change <flow>`.
 
-`sbe update` incrementally refreshes changed files in an existing `.sbe` index. `sbe impact <symbol>` prints affected symbol count, affected file count, and traversal depth; use `--json` for the detailed report.
+`sbe watch` listens for created, modified, deleted, and renamed source files and re-indexes only affected paths. `sbe update` incrementally refreshes changed files in an existing `.sbe` index.
+
+`sbe diff [base]` maps git working tree or base revision changes to indexed symbols and impacted dependents. Use `sbe diff HEAD~1` or `sbe diff HEAD~5` to compare against earlier revisions.
+
+`sbe trace <symbol>` prints a dependency path for a symbol; add `--json` for automation.
+
+`sbe impact <symbol>` prints affected symbol count, affected file count, and traversal depth; use `--json` for the detailed report.
 
 `sbe context <symbol>` compiles a deterministic, budgeted context pack for future AI tools without calling an AI model.
 
