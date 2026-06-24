@@ -1,8 +1,10 @@
 /target/
 /.sbe/
 **/.sbe/
+node_modules/
 dist/
 artifacts/
+*.vsix
 .npm-cache/
 *.msi
 *.wixobj

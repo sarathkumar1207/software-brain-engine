@@ -133,12 +133,13 @@ async function runSbe(args: string[]): Promise<string> {
   }
   const binary = vscode.workspace.getConfiguration("sbe").get<string>("binaryPath", "sbe");
   return new Promise((resolve, reject) => {
-    cp.execFile(binary, [...args, workspace], { cwd: workspace }, (error, stdout, stderr) => {
+    const child = cp.execFile(binary, [...args, workspace], { cwd: workspace }, (error, stdout, stderr) => {
       if (error) {
         reject(new Error(stderr || error.message));
         return;
       }
       resolve(stdout);
     });
-  }).on("error", reject);
+    child.on("error", reject);
+  });
 }

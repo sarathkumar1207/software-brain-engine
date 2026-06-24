@@ -5,6 +5,16 @@
   "version": "0.1.0",
   "publisher": "sbe",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sarathkumar1207/software-brain-engine.git",
+    "directory": "extensions/vscode"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
     "vscode": "^1.90.0"
   },
